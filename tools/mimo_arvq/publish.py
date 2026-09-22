@@ -163,6 +163,7 @@ def roster(layer, root, work=None):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--work", type=Path, required=True)
+    parser.add_argument("--initial-only", action="store_true")
     args = parser.parse_args()
     work = args.work
     lock = (work / "publisher.lock").open("a")
@@ -347,6 +348,30 @@ def main():
                     atomic(root / "model.safetensors.index.json", index)
                     atomic(state_path, state)
                     print("UPLOADED", layer, phase, flush=True)
+            if args.initial_only and len(state["layers"]) == 69:
+                completion = {
+                    "complete": True,
+                    "uploaded_layers": 69,
+                    "hybrid_pv_layers": sum(
+                        v["phase"] == "pv" for v in state["layers"].values()
+                    ),
+                    "mode": "prepared hybrid fits; additional PV skipped by request",
+                    "full_model_evaluation": "pending",
+                    "production_ready": False,
+                }
+                api.create_commit(
+                    repo_id=REPO,
+                    operations=[
+                        CommitOperationAdd(
+                            path_in_repo="fit_completion.json",
+                            path_or_fileobj=json.dumps(completion, indent=2).encode(),
+                        )
+                    ],
+                    commit_message="Complete hybrid initial-fit checkpoint upload",
+                )
+                state["initial_upload_complete"] = True
+                atomic(state_path, state)
+                return
             if len(state["layers"]) == 69 and all(
                 v["phase"] == "pv" for v in state["layers"].values()
             ):

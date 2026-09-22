@@ -162,3 +162,15 @@ replicated expert books. Runtime allowance of 20–30 GiB gives 370.9–380.9 Gi
 actual TP4 usable memory, auxiliary replication, speculative KV and workspace
 usage still require measurement. Allocation is approved; serving fit is not yet
 qualified. The previous all-cold completion ETA is not a final-hybrid ETA.
+
+## Direct-upload override
+
+The user subsequently requested immediate upload of prepared fits because B200
+access time is limited. The hybrid driver and queued training handoff were
+stopped during layer 2; the completed hybrid layer-1 result is retained.
+`export_initial.py` exports the remaining prepared layers in parallel, and
+`publish.py --initial-only` uploads them with matching allocation/config and
+terminates once all 69 layers have verified remote hashes. No further hybrid PV
+or full-model evaluation is required before this requested upload. The model
+card explicitly describes the mixture of earlier PV candidates and lightweight
+fits; it does not claim a completed hybrid PV campaign or qualified serving.
