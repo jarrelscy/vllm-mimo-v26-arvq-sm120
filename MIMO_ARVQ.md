@@ -7,6 +7,12 @@ This fork starts from `jarrelscy/vllm-glm52-sm120` commit
 per-expert ARVQ v4/v5 kernels while adding a separate MiMo campaign.
 The GLM launchers and format integration are not MiMo launch commands.
 
+Initial checks: the calibration source reader passed known-code, block-scale,
+and invalid-input tests. A real layer-1 expert decoded all three projections
+with the expected shapes and finite values. Native MiMo chat formatting and
+tokenizer round-trip passed with a separate reasoning_content field. These
+checks do not yet establish serving-kernel parity or quantized model quality.
+
 Target: four RTX PRO 6000 Blackwell GPUs, one 1,048,576-token sequence,
 with vision, audio, audio tokenizer, embedded MTP and five-layer DFlash
 preserved. Output: `jarrelscy/MiMo-V2.6-Pro-RL-ARVQ-hybrid`.
@@ -60,3 +66,9 @@ attention sinks, sliding-window eviction, multimodal class dispatch and
 DFlash integration must all be tested on SM120. A text-only successful load
 does not satisfy the target. Do not publish production_ready=true until the
 entire serving gate passes.
+
+MiMo's H=6144 and TP4 intermediate=512 satisfy the existing ARVQ loader's
+multiple-of-128 shape requirement. Its hyb_kind array is sized dynamically
+from num_experts, so the 384-expert roster is not inherently limited to GLM's
+256. Routing, expert-id handling and all CUDA dispatch paths still need a real
+384-expert TP4 test; shape eligibility alone does not qualify the kernels.

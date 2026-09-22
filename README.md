@@ -1,4 +1,11 @@
 <!-- markdownlint-disable MD001 MD041 -->
+
+> **MiMo-V2.6-Pro-RL ARVQ / SM120 development fork — work in progress.**
+> Target: four RTX PRO 6000 GPUs, 1M context, with vision, audio and MTP/DFlash.
+> See [the campaign plan and current limitations](MIMO_ARVQ.md).
+> [HF checkpoint repository](https://huggingface.co/jarrelscy/MiMo-V2.6-Pro-RL-ARVQ-hybrid).
+> MiMo ARVQ fitting and full serving validation have not completed.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/vllm-project/vllm/main/docs/assets/logos/vllm-logo-text-dark.png">

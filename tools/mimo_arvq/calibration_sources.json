@@ -1,0 +1,27 @@
+{
+  "status": "inventory_only_not_training_ready",
+  "glm_v32_raw_sources": [
+    "m-a-p/CodeFeedback-Filtered-Instruction",
+    "jtatman/python-code-dataset-500k",
+    "open-r1/OpenR1-Math-220k",
+    "cognitivecomputations/dolphin-r1 (reasoning-deepseek)",
+    "tatsu-lab/alpaca",
+    "MedRAG/textbooks",
+    "databricks/databricks-dolly-15k",
+    "local vLLM code and documentation",
+    "synthetic tool sessions generated from local code artifacts"
+  ],
+  "findings": [
+    "Latest GLM corpus rebuilt after tmp wipe: 15,007,754 GLM tokens; the older 18M count does not describe this rebuild.",
+    "B200 trace-refit directories currently contain token arrays, not original conversation JSONL.",
+    "CT rollout JSONL exists but is a separate medical task corpus, not the original general agentic calibration corpus.",
+    "MiMo chat template expects reasoning_content separately from content; directly reusing GLM formatted text would duplicate or misplace reasoning boundaries."
+  ],
+  "next_steps": [
+    "Recover raw conversations or rebuild documents from their generators; record immutable source revisions.",
+    "Save raw source records and stable document/group identifiers before native MiMo tokenization.",
+    "Keep train/validation/audit group-disjoint, with representative distributions; reserve separate OOD tests.",
+    "Re-encode image/audio using MiMo processors and encoders; GLM embeddings are incompatible.",
+    "Include diverse prose and long-context evaluation rather than assume the GLM mixture generalizes."
+  ]
+}
