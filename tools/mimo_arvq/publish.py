@@ -136,7 +136,11 @@ Serving fork: https://github.com/jarrelscy/vllm-mimo-v26-arvq-sm120
     return seed
 
 
-def roster(layer, root):
+def roster(layer, root, work=None):
+    if work is not None and (work / "allocation.json").exists():
+        path = root / f"roster-layer-{layer:03d}.safetensors"
+        shutil.copy2(work / "hot" / f"layer{layer}.safetensors", path)
+        return path
     prefix = f"model.layers.{layer}.mlp.experts."
     tensors = {prefix + "hyb_kind": torch.full((384,), 2, dtype=torch.int8)}
     shapes = {
@@ -202,7 +206,7 @@ def main():
                     paths = [
                         export / item["file"] for item in manifest["files"].values()
                     ]
-                    paths.append(roster(layer, export))
+                    paths.append(roster(layer, export, work))
                     expected = {}
                     for path in paths:
                         expected[path.name] = sha(path)
@@ -276,6 +280,39 @@ def main():
                             path_or_fileobj=json.dumps(progress, indent=2).encode(),
                         ),
                     ]
+                    config = None
+                    if (work / "allocation.json").exists():
+                        config = json.loads((root / "config.json").read_text())
+                        cold = manifest["cold_expert_ids"]
+                        hot = manifest["hot_expert_ids"]
+                        config["quantization_config"]["aqlm_layer_books"][
+                            str(layer)
+                        ] = {
+                            "n_nvfp4": len(hot),
+                            "n_base": 0,
+                            "n_cold": len(cold),
+                            "cold_expert_ids": cold,
+                        }
+                        config["arvq_campaign"]["allocation"] = (
+                            "transitioning to 1325 NVFP4 hot experts; "
+                            "per-layer counts authoritative"
+                        )
+                        operations.extend(
+                            [
+                                CommitOperationAdd(
+                                    path_in_repo="config.json",
+                                    path_or_fileobj=json.dumps(config).encode(),
+                                ),
+                                CommitOperationAdd(
+                                    path_in_repo="allocation.json",
+                                    path_or_fileobj=str(work / "allocation.json"),
+                                ),
+                                CommitOperationAdd(
+                                    path_in_repo="README.md",
+                                    path_or_fileobj=str(root / "README.md"),
+                                ),
+                            ]
+                        )
                     if phase == "pv":
                         operations.append(
                             CommitOperationAdd(
@@ -305,6 +342,8 @@ def main():
                         if item.lfs is not None and item.lfs.sha256 != digest:
                             raise ValueError(f"Remote hash mismatch: {name}")
                     state["layers"] = new_layers
+                    if config is not None:
+                        atomic(root / "config.json", config)
                     atomic(root / "model.safetensors.index.json", index)
                     atomic(state_path, state)
                     print("UPLOADED", layer, phase, flush=True)

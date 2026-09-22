@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent / "recipe"))
 from arvq88.activation import activation_ste
 from arvq88.inputs import write
 from arvq88.pv import Projection
+from hybrid import allocation, hot_output, load_hot
 from propagation_math import expert_from_packed_input
 from reference import Layer
 from source import Source
@@ -55,6 +56,8 @@ def main():
     source = Source(work / "source")
     layer = Layer(source, number, dev)
     cfg = json.loads((work / "config.json").read_text())
+    hot_weights = load_hot(work, number, dev)
+    _, cold = allocation(work, number)
     train_root = work / f"training_capture{number}"
     eval_root = work / f"capture{number}"
     state_root = work / f"states{number}"
@@ -96,6 +99,13 @@ def main():
                     flat = torch.cat([x[i, :n] for i, n in enumerate(lengths)])
                     ids, gates = layer.route(flat)
                     target = layer.native_moe(flat, ids, gates)
+                    frozen = (
+                        hot_output(
+                            activation_ste(flat.float()), ids, gates, hot_weights
+                        )
+                        if hot_weights
+                        else torch.zeros_like(target)
+                    )
                     following = []
                     for sequence, n in zip(numbers, lengths):
                         start = sequence * 1024 + 1
@@ -113,7 +123,7 @@ def main():
                         "x": flat.cpu(),
                         "topk_ids": ids.cpu(),
                         "topk_weights": gates.cpu(),
-                        "required": target.cpu(),
+                        "required": (target - frozen).cpu(),
                         "row_weight": weights.cpu(),
                         "sequence_ids": numbers,
                         "sequence_lengths": lengths,
@@ -139,9 +149,9 @@ def main():
                             "topk_ids": data["topk_ids"],
                             "topk_weights": data["topk_weights"],
                             "pv_split": torch.full((len(flat),), label),
-                            "frozen_output": torch.zeros_like(data["required"]),
-                            "reference_output": data["required"],
-                            "same_input_output": data["required"],
+                            "frozen_output": frozen.cpu(),
+                            "reference_output": target.cpu(),
+                            "same_input_output": target.cpu(),
                             "row_weight": data["row_weight"],
                             "sequence_ids": torch.tensor(numbers).repeat_interleave(
                                 torch.tensor(lengths)
@@ -176,9 +186,13 @@ def main():
             store.update(
                 torch.load(selected / f"{key}.pt", weights_only=True, mmap=True)
             )
-        p13 = Projection(store, "", "w13", 384, dev)
-        p2 = Projection(store, "", "w2", 384, dev)
-        decoded = [(p13.weight(e).detach(), p2.weight(e).detach()) for e in range(384)]
+        p13 = Projection(store, "", "w13", len(cold), dev)
+        p2 = Projection(store, "", "w2", len(cold), dev)
+        decoded = {
+            expert: (p13.weight(slot).detach(), p2.weight(slot).detach())
+            for slot, expert in enumerate(cold)
+        }
+        decoded.update(hot_weights)
         del p13, p2, store
         for split in ("train", "validation", "audit"):
             for path in sorted(train_root.glob(f"{split}_rank{rank}_*.pt")):
@@ -191,7 +205,7 @@ def main():
                 y = torch.zeros_like(x)
                 with torch.no_grad():
                     packed_input = activation_ste(x)
-                    for e, (w13, w2) in enumerate(decoded):
+                    for e, (w13, w2) in sorted(decoded.items()):
                         rows, slots = torch.where(ids == e)
                         if len(rows):
                             output = expert_from_packed_input(

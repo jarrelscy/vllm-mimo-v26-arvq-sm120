@@ -24,6 +24,7 @@ from arvq88.activation import ARITHMETIC
 from arvq88.gradient_indices import expert_output
 from arvq88.inputs import write
 from arvq88.pv import Projection
+from hybrid import allocation, load_hot
 from reference import Layer, rms
 from source import Source
 
@@ -133,7 +134,12 @@ def main():
                 store.update(
                     torch.load(selected / f"{key}.pt", weights_only=True, mmap=True)
                 )
-            p13, p2 = [Projection(store, "", key, 384, dev) for key in ("w13", "w2")]
+            _, cold = allocation(work, number)
+            hot_weights = load_hot(work, number, dev)
+            p13, p2 = [
+                Projection(store, "", key, len(cold), dev) for key in ("w13", "w2")
+            ]
+            cold_slots = {expert: slot for slot, expert in enumerate(cold)}
             residual, x = layer.front(student)
             flat = x.flatten(0, 1).float()
             ids, gates = layer.route(flat)
@@ -141,9 +147,12 @@ def main():
             for e in range(384):
                 rows, slots = torch.where(ids == e)
                 if len(rows):
-                    y = expert_output(
-                        flat[rows], p13.weight(e), p2.weight(e), ARITHMETIC
-                    )
+                    if e in hot_weights:
+                        w13, w2 = hot_weights[e]
+                    else:
+                        slot = cold_slots[e]
+                        w13, w2 = p13.weight(slot), p2.weight(slot)
+                    y = expert_output(flat[rows], w13, w2, ARITHMETIC)
                     output.index_add_(0, rows, y * gates[rows, slots, None])
             student = residual + output.reshape_as(residual).to(residual.dtype)
             del p13, p2, store, residual, x, flat, output, ids, gates

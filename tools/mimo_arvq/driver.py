@@ -18,9 +18,11 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE / "recipe"))
 from arvq88.inputs import write  # noqa: E402
 from arvq88.pack import export_layer  # noqa: E402
+from hybrid import allocation  # noqa: E402
 
 
 def export(work, layer, phase):
+    _, cold = allocation(work, layer)
     initial = work / "baseline" / "initial" / f"layer_{layer:05d}"
     report = None
     if phase == "initial":
@@ -68,7 +70,7 @@ def export(work, layer, phase):
                 for key in ("c0", "c1", "a", "b", "s"):
                     exemplar = merged[key]
                     result = torch.empty(
-                        (384, *exemplar.shape[1:]), dtype=exemplar.dtype
+                        (len(cold), *exemplar.shape[1:]), dtype=exemplar.dtype
                     )
                     for rank in ranks:
                         result[rank["slots"]] = rank["encoded"][projection][key]

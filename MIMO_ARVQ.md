@@ -130,3 +130,32 @@ for TP4. MTP output projections already bypass quantization and retain BF16.
 All three embedded MTP layers are preserved, while the inherited serving code
 currently activates only the first. These are deployment gates, not changes to
 the text fitting objective.
+
+## Approved 5% hot transition
+
+The user approved 1325 NVFP4 hot experts out of 26496 routed experts (5.0008%).
+`queue_hybrid.py` waits for the current candidate campaign and its evaluation,
+then runs `prepare_hybrid.py` and a second sequential PV campaign in
+`/data/jarrel/mimo-v26-arvq-hot5`. It does not wait for successful HF uploads.
+The existing fits are warm starts, not discarded work.
+
+Allocation globally ranks routing-weighted output-error reduction from NVFP4
+versus the accepted ARVQ candidates on retained training probes. Each layer is
+capped at 192 hot experts; the total remains 1325. This is an additive expert
+error proxy, measured on text only, not full-model loss. Native released MXFP4
+experts supply the reference; hot weights are converted to E2M1 with E4M3 scales
+per 16 weights and FP32 projection globals. Packed hot weights are used in both
+frozen-output capture and propagation. Validation/audit tokens do not choose
+allocation. The full-model test evaluates the final hybrid separately.
+
+The hybrid pass recaptures student inputs from layer 1, subtracts frozen hot
+output from the PV training target, and tunes only the remaining cold experts.
+The previous Adam/index/early-stopping settings remain unchanged. The publisher
+commits weights, hot/cold roster, config and tensor index atomically per layer.
+Both campaigns share a publisher lock to prevent stale concurrent overwrites.
+
+The 5% estimate is 350.9 GiB for weights plus 1M BF16 main-model KV, including
+replicated expert books. Runtime allowance of 20–30 GiB gives 370.9–380.9 GiB;
+actual TP4 usable memory, auxiliary replication, speculative KV and workspace
+usage still require measurement. Allocation is approved; serving fit is not yet
+qualified. The previous all-cold completion ETA is not a final-hybrid ETA.
