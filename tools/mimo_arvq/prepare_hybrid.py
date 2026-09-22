@@ -22,6 +22,17 @@ from propagation_math import expert_from_packed_input
 from source import Source
 
 
+def candidate_source(parent, work, layer):
+    for path in (
+        parent / f"layer{layer}_same_input/merged",
+        parent / "baseline/initial" / f"layer_{layer:05d}",
+        work / "allocation_calibration/baseline/initial" / f"layer_{layer:05d}",
+    ):
+        if (path / "arvq-manifest.json").exists():
+            return path
+    raise ValueError(f"Missing candidate fit for layer {layer}")
+
+
 def select_hot(scores, count, cap=192):
     """Global benefit ranking with deterministic ties and a per-layer cap."""
     selected = {str(layer): [] for layer in range(1, 70)}
@@ -55,15 +66,19 @@ def main():
     dist.init_process_group("nccl")
     dev = f"cuda:{rank}"
     source = Source(parent / "source")
-    (work / "scores").mkdir(parents=True, exist_ok=True)
+    score_root = work / "allocation_scores"
+    score_root.mkdir(parents=True, exist_ok=True)
+    calibration = work / "allocation_calibration"
+    if not (calibration / "allocation_capture_complete.json").exists():
+        calibration = parent
     (work / "hot").mkdir(exist_ok=True)
     for layer in range(1 + rank, 70, world):
         if args.score_layers and layer not in args.score_layers:
             continue
-        path = work / "scores" / f"layer{layer}.json"
+        path = score_root / f"layer{layer}.json"
         if path.exists():
             continue
-        selected = parent / f"layer{layer}_same_input/merged"
+        selected = candidate_source(parent, work, layer)
         store = {}
         for key in ("w13", "w2"):
             store.update(
@@ -72,7 +87,7 @@ def main():
         p13, p2 = [Projection(store, "", key, 384, dev) for key in ("w13", "w2")]
         parts = [
             torch.load(
-                parent / f"capture{layer}/rank{r}.pt", weights_only=True, mmap=True
+                calibration / f"capture{layer}/rank{r}.pt", weights_only=True, mmap=True
             )
             for r in range(world)
         ]
@@ -101,8 +116,7 @@ def main():
             hot = expert_from_packed_input(packed[rows], h13, h2)
             # Match the source reference's BF16 expert linear boundaries.
             z = x[rows].bfloat16()
-            gu = F.linear(z, torch.cat((wg, wu)).bfloat16())
-            g, u = gu.chunk(2, -1)
+            g, u = F.linear(z, wg.bfloat16()), F.linear(z, wu.bfloat16())
             ref = F.linear(F.silu(g) * u, wd.bfloat16()).float()
             benefit = (cold.double() - ref).square().sum(-1) - (
                 hot.double() - ref
@@ -131,9 +145,7 @@ def main():
         return
     if rank == 0:
         scores = {
-            layer: json.loads((work / "scores" / f"layer{layer}.json").read_text())[
-                "scores"
-            ]
+            layer: json.loads((score_root / f"layer{layer}.json").read_text())["scores"]
             for layer in range(1, 70)
         }
         hot = select_hot(scores, 1325)
@@ -159,7 +171,7 @@ def main():
         cold = [e for e in range(384) if e not in hot]
         root = work / "baseline/initial" / f"layer_{layer:05d}"
         root.mkdir(parents=True, exist_ok=True)
-        selected = parent / f"layer{layer}_same_input/merged"
+        selected = candidate_source(parent, work, layer)
         for key in ("w13", "w2"):
             data = torch.load(selected / f"{key}.pt", weights_only=True, mmap=True)[key]
             for name in ("c0", "c1", "a", "b", "s"):

@@ -134,13 +134,16 @@ the text fitting objective.
 ## Approved 5% hot transition
 
 The user approved 1325 NVFP4 hot experts out of 26496 routed experts (5.0008%).
-`queue_hybrid.py` waits for the current candidate campaign and its evaluation,
-then runs `prepare_hybrid.py` and a second sequential PV campaign in
-`/data/jarrel/mimo-v26-arvq-hot5`. It does not wait for successful HF uploads.
-The existing fits are warm starts, not discarded work.
+`queue_hybrid.py` stops the all-cold campaign at the current layer boundary.
+`allocation_capture.py` captures a native reference trajectory on 65536 training
+tokens (64 sequences spread across the training corpus). Only missing candidate
+fits are produced on this small capture, without all-cold PV or full-corpus
+propagation. `prepare_hybrid.py` then allocates the hot budget and starts the
+sequential hybrid PV campaign in `/data/jarrel/mimo-v26-arvq-hot5`. It does not
+wait for successful HF uploads. Existing accepted fits are reused as warm starts.
 
 Allocation globally ranks routing-weighted output-error reduction from NVFP4
-versus the accepted ARVQ candidates on retained training probes. Each layer is
+versus the ARVQ candidates on the same small native training trajectory. Each layer is
 capped at 192 hot experts; the total remains 1325. This is an additive expert
 error proxy, measured on text only, not full-model loss. Native released MXFP4
 experts supply the reference; hot weights are converted to E2M1 with E4M3 scales
