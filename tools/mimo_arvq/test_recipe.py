@@ -12,10 +12,26 @@ import torch.multiprocessing as mp
 
 sys.path.insert(0, str(Path(__file__).parent / "recipe"))
 from arvq88.activation import ARITHMETIC, activation_ste
-from arvq88.encoder import fit_layer_projection, sweep_expert
+from arvq88.encoder import fit_layer_projection, refit_scales, sweep_expert
 from arvq88.gradient_indices import expert_output
 from arvq88.perf.distributed_batch import broadcast_batch
 from propagation_math import expert_from_packed_input
+
+
+def test_scale_refit_saturates_fp8_overflow():
+    weights = torch.full((1, 128), 500.0)
+    codes = torch.zeros((1, 16), dtype=torch.uint8)
+    scales = refit_scales(
+        weights,
+        codes,
+        codes,
+        torch.ones(256, 8),
+        torch.zeros(256, 8),
+        1.0,
+        torch.ones(128),
+        128,
+    )
+    assert scales.item() == 448.0
 
 
 def test_hessian_factor_keeps_fp32_range():

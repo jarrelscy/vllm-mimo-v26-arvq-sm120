@@ -162,7 +162,7 @@ def refit_scales(W, a, b, c0, c1, glob, hdiag, K):
     num = (hd * Wg * u).reshape(N, K // 128, 128).sum(-1)
     den = (hd * u * u).reshape(N, K // 128, 128).sum(-1).clamp_min(1e-20)
     s = (num / den)
-    s = s.clamp_min(0).to(torch.float8_e4m3fn).float()
+    s = _e4m3(s.clamp_min(0))
     return s
 
 
@@ -183,7 +183,9 @@ class EncodedLayerProj:
 
 
 def _e4m3(x):
-    return x.to(torch.float8_e4m3fn).float()
+    # PyTorch's E4M3 cast returns NaN on overflow; scales must saturate.
+    limit = torch.finfo(torch.float8_e4m3fn).max
+    return x.clamp(-limit, limit).to(torch.float8_e4m3fn).float()
 
 
 def fit_layer_projection(W, H, *, col_block=128, cb_iters=8, sweep_passes=2,
