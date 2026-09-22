@@ -1,0 +1,14 @@
+{
+  "arvq88/__init__.py": "0bf1139931af3c4357fa592ee2f2abc669bc2ce17826b4ab9cb4f593f773d018",
+  "arvq88/encoder.py": "6c20c56fc7a308724ab4faf4174c4e8e32cba5a43c3fccd3f3e6d4da1f0b583e",
+  "arvq88/activation.py": "cf13e2170085459b97907a270abb32d694af3ce69f723b332119a62be00e6641",
+  "arvq88/gradient_indices.py": "09bd66d77575deec66d1732677355c406cb9b228abfc5002e79cbae5adb72e83",
+  "arvq88/pack.py": "b0606bf8ae91bab655ed5b26bb9b7437f0e28718301fdb1b86f475b1b31924e1",
+  "arvq88/perf/sequential_pv_full_corpus.py": "297df5e8e276e2caaae2af049b4dc0bf2e6185e0a9844bfdf705272aa4f96c3c",
+  "arvq88/perf/full_corpus.py": "db9e8cb6b3d7ea22fc8490fc355fd9421dfc7429c600431cc37f52017f9811c2",
+  "arvq88/perf/adaptive_schedule.py": "504f54400931422d706544029ca1c3673224f33f77d7801c89dda1d4ba53dd30",
+  "arvq88/perf/sparse_delta.py": "52565e3bdaa477d1676fffaf10bdffd10e1ad2d1b4275ded2cdd1d210bd0f81e",
+  "arvq88/perf/distributed_batch.py": "ff4fcfdc9c74bc46f06bb51a126d2764aa4d983da5b9eebc06885081330fa39e",
+  "arvqprep/__init__.py": "921c16de3c268ed12dcac8329852f47fb6875d926a2ea665a03e69c81059b23d",
+  "arvqprep/pack.py": "ce459847f07a558377872e0f1f83620d9f26d9eec7ec94d08247052876bab656"
+}

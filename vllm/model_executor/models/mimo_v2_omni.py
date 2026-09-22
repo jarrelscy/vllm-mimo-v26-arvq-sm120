@@ -55,7 +55,7 @@ from .interfaces import (
     SupportsQuant,
 )
 from .mimo_audio import MimoAudioEncoder
-from .mimo_v2 import MiMoV2FlashForCausalLM
+from .mimo_v2 import MiMoV2FlashForCausalLM, MiMoV2ForCausalLM
 from .qwen2_5_vl import (
     Qwen2_5_VisionMLP,
     Qwen2_5_VisionPatchEmbed,
@@ -1209,7 +1209,12 @@ class MiMoV2OmniForCausalLM(nn.Module, SupportsMultiModal, SupportsPP, SupportsQ
         else:
             self.audio_encoder = None
         with self._mark_language_model(vllm_config):
-            self.language_model = MiMoV2FlashForCausalLM(
+            language_class = (
+                MiMoV2ForCausalLM
+                if getattr(config, "mimo_qkv_layout", None) == "grouped"
+                else MiMoV2FlashForCausalLM
+            )
+            self.language_model = language_class(
                 vllm_config=vllm_config,
                 prefix=maybe_prefix(prefix, "language_model"),
             )

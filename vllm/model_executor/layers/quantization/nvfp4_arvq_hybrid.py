@@ -159,9 +159,7 @@ def _projection(x, cold_ids, hot_ids, tensors, alpha, n, split, hot_parts):
     if not hot_only:
         _layout(tensors[1])
         if _is_mb16(tensors[1]) != (extras is not None):
-            raise ValueError(
-                "mcbook16 codebooks and selectors must be loaded together"
-            )
+            raise ValueError("mcbook16 codebooks and selectors must be loaded together")
     lib = _kernels()
     launch = lib.hybrid_launch if hot_only else _launch_for_codebooks(lib, tensors[1])
     slots, k = x.shape
@@ -309,11 +307,12 @@ def _arvq_mlp_fake(x, topk_weights, topk_ids, lookups, tensors, alphas, chunk_to
 class NvFp4ArvqHybridConfig(NvFp4AqlmHybridConfig):
     """Explicit ARVQ checkpoint marker within the existing hybrid envelope."""
 
-    def __init__(self, *args, arvq_format="rvq256_128x8", **kwargs):
+    def __init__(self, *args, arvq_format="rvq256_128x8", source_fp8=None, **kwargs):
         if arvq_format not in _FORMATS:
             raise ValueError(f"Unsupported ARVQ format: {arvq_format}")
         super().__init__(*args, **kwargs)
         self.arvq_format = arvq_format
+        self.source_fp8 = source_fp8
 
     @classmethod
     def get_name(cls) -> Literal["nvfp4_arvq_hybrid"]:
@@ -380,11 +379,21 @@ class NvFp4ArvqHybridConfig(NvFp4AqlmHybridConfig):
         nvfp4 = cast(
             ModelOptNvFp4Config, ModelOptNvFp4Config.from_config(config["nvfp4"])
         )
-        return cls(nvfp4, books, arvq_format=marker["format"])
+        source_fp8 = None
+        if "source_fp8" in config:
+            from vllm.model_executor.layers.quantization.fp8 import Fp8Config
+
+            source_fp8 = Fp8Config.from_config(config["source_fp8"])
+        return cls(nvfp4, books, arvq_format=marker["format"], source_fp8=source_fp8)
 
     @classmethod
     def get_min_capability(cls):
         return 120
+
+    def apply_vllm_mapper(self, hf_to_vllm_mapper) -> None:
+        super().apply_vllm_mapper(hf_to_vllm_mapper)
+        if self.source_fp8 is not None:
+            self.source_fp8.apply_vllm_mapper(hf_to_vllm_mapper)
 
     def get_quant_method(self, layer, prefix):
         from vllm.model_executor.layers.linear import LinearBase
@@ -392,6 +401,12 @@ class NvFp4ArvqHybridConfig(NvFp4AqlmHybridConfig):
             NvFp4P4LinearMethod,
             matches,
         )
+
+        if self.source_fp8 is not None and isinstance(layer, LinearBase):
+            # MiMo retains the released FP8/BF16 backbone. Only routed experts
+            # are replaced by ARVQ; never reinterpret FP8 bytes as NVFP4.
+            self.source_fp8.packed_modules_mapping = self.packed_modules_mapping
+            return self.source_fp8.get_quant_method(layer, prefix)
 
         if isinstance(layer, LinearBase) and matches(prefix):
             # MTP construction can use layers.78 without an mtp_block component.
@@ -611,6 +626,7 @@ class ArvqExpertsMoEMethod(TPHybridExpertsMoEMethod):
         for proj in ("w13", "w2"):
             packed = getattr(layer, f"arvq_{proj}_packed")
             cb = getattr(layer, f"arvq_{proj}_codebooks")
+            expected_books: tuple[int, ...]
             if self.arvq_format in _EXPERT_SCOPE_FORMATS:
                 books = _MB16_ENTRIES if proj_is_mb16(proj) else entries
                 expected_books = (self.n_cold, books)

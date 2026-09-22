@@ -1,5 +1,5 @@
 {
-  "status": "preparation",
+  "status": "initial_fit_and_pv_running",
   "source_repo": "XiaomiMiMo/MiMo-V2.6-Pro-RL",
   "source_revision": "73875d00b30a89ef8cc353a0b60b0e9f9561952d",
   "output_repo": "jarrelscy/MiMo-V2.6-Pro-RL-ARVQ-hybrid",
@@ -9,11 +9,12 @@
   "experts_per_layer": 384,
   "cold_format": "rvq256_256x8_expert_fp16block",
   "cold_bits_per_weight_including_block_scales": 2.125,
-  "hot_fraction": null,
-  "allocation_score": "activation_weighted_actual_arvq_vs_hot_output_error",
+  "hot_fraction": 0.0,
+  "allocation_status": "all-cold memory baseline; hot budget unqualified",
+  "allocation_score": "not_used_for_all_cold_baseline",
   "pv_objective": "same_input",
   "pv_index_reassignment": "activation_weighted_output_error",
-  "calibration_status": "raw_source_inventory_pending",
+  "calibration_status": "18006461_native_tokenized_text_tokens_ready",
   "production_ready": false,
   "required_gates": [
     "source_hash_verification",
