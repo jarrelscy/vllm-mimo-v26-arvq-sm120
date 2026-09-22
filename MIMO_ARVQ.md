@@ -126,7 +126,7 @@ Additional serving work remains: the Omni wrapper now accepts
 `mimo_qkv_layout="grouped"` to select the Pro language backbone, but the HF
 architecture override has not been serving-qualified. The existing MTP loader
 still assumes simple TP slicing of grouped QKV tensors, which requires review
-for TP4, and native BF16 MTP output projections need explicit FP8 exclusions.
+for TP4. MTP output projections already bypass quantization and retain BF16.
 All three embedded MTP layers are preserved, while the inherited serving code
 currently activates only the first. These are deployment gates, not changes to
 the text fitting objective.
