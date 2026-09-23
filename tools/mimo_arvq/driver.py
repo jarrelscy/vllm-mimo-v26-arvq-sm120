@@ -100,7 +100,11 @@ def export(work, layer, phase):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--work", type=Path, required=True)
+    parser.add_argument("--start-layer", type=int, default=1)
+    parser.add_argument("--end-layer", type=int, default=69)
     args = parser.parse_args()
+    if not 1 <= args.start_layer <= args.end_layer <= 69:
+        raise ValueError("Invalid layer range")
     work = args.work
     lock = (work / "driver.lock").open("a")
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -193,7 +197,7 @@ def main():
         "--nproc_per_node=8",
     ]
     ensure_publisher()
-    for layer in range(1, 70):
+    for layer in range(args.start_layer, args.end_layer + 1):
         if (work / "STOP").exists():
             write(
                 work / "pipeline_status.json", {"stage": "stopped", "next_layer": layer}
@@ -253,7 +257,7 @@ def main():
         )
         if not (work / "exports" / "pv" / f"layer{layer}" / "ready.json").exists():
             export(work, layer, "pv")
-        if layer < 69:
+        if layer < args.end_layer:
             run(
                 "propagate",
                 layer,
@@ -278,6 +282,16 @@ def main():
                 path = work / folder
                 if path.exists():
                     shutil.rmtree(path)
+    if args.end_layer < 69:
+        write(
+            work / "pipeline_status.json",
+            {
+                "stage": "requested_layers_complete",
+                "layers": list(range(args.start_layer, args.end_layer + 1)),
+                "uploads": "independent publisher continues",
+            },
+        )
+        return
     run(
         "full_model",
         69,

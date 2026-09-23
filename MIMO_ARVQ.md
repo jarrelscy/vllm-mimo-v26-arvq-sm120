@@ -174,3 +174,16 @@ terminates once all 69 layers have verified remote hashes. No further hybrid PV
 or full-model evaluation is required before this requested upload. The model
 card explicitly describes the mixture of earlier PV candidates and lightweight
 fits; it does not claim a completed hybrid PV campaign or qualified serving.
+
+## Resumed PV through the remaining layers
+
+After layers 21 and 22 completed, the user extended access and requested all
+remaining layers. The bounded driver resumes at layer 22 (its completed PV is
+skipped by receipt) to propagate its selected output, then tunes layers 23–69.
+The uploaded initial checkpoint remains usable as a complete weight set while
+per-layer PV replacements arrive. Layers 1–20 retain their earlier accepted
+candidates; their packed tensor payloads were checked identical to the cached
+trajectory used to start layer 21. Layer 9 remains the audit-selected initial
+fit. Final model evaluation now reads either the accepted PV export or the
+prepared initial export, matching the actual mixed checkpoint. Publication of
+the evaluation does not require retuning the already accepted early layers.

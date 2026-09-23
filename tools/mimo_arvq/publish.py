@@ -281,6 +281,26 @@ def main():
                             path_or_fileobj=json.dumps(progress, indent=2).encode(),
                         ),
                     ]
+                    if len(new_layers) == 69:
+                        operations.append(
+                            CommitOperationAdd(
+                                path_in_repo="fit_completion.json",
+                                path_or_fileobj=json.dumps(
+                                    {
+                                        "complete": True,
+                                        "uploaded_layers": 69,
+                                        "hybrid_pv_layers": sum(
+                                            v["phase"] == "pv"
+                                            for v in new_layers.values()
+                                        ),
+                                        "mode": "complete checkpoint; incremental PV",
+                                        "full_model_evaluation": "pending",
+                                        "production_ready": False,
+                                    },
+                                    indent=2,
+                                ).encode(),
+                            )
+                        )
                     config = None
                     if (work / "allocation.json").exists():
                         config = json.loads((root / "config.json").read_text())
@@ -373,7 +393,9 @@ def main():
                 atomic(state_path, state)
                 return
             if len(state["layers"]) == 69 and all(
-                v["phase"] == "pv" for v in state["layers"].values()
+                v["phase"] == "pv"
+                or not (work / "exports/pv" / f"layer{layer}/ready.json").exists()
+                for layer, v in state["layers"].items()
             ):
                 report = work / "full_model_evaluation/report.json"
                 if report.exists():
@@ -385,6 +407,10 @@ def main():
                     ]
                     for layer in range(1, 70):
                         for name in ("report", "selection"):
+                            if not (
+                                work / f"layer{layer}_same_input" / f"{name}.json"
+                            ).exists():
+                                continue
                             operations.append(
                                 CommitOperationAdd(
                                     path_in_repo=f"pv_reports/layer-{layer:03d}-{name}.json",

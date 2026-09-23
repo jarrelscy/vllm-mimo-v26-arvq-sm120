@@ -15,11 +15,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--work", type=Path, required=True)
     parser.add_argument("--wait", action="store_true")
+    parser.add_argument("--require-pv-layers", type=int, nargs="*", default=[])
     args = parser.parse_args()
     work = args.work
     while True:
         state = json.loads((work / "upload_state.json").read_text())
-        if state.get("initial_upload_complete"):
+        if state.get("initial_upload_complete") and all(
+            state["layers"].get(str(layer), {}).get("phase") == "pv"
+            for layer in args.require_pv_layers
+        ):
             break
         if not args.wait:
             raise ValueError("Upload is not complete")

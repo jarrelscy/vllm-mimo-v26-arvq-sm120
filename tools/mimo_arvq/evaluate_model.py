@@ -115,7 +115,15 @@ def main():
         student = teacher.clone()
         del embedding
     for number in range(start, 70):
-        if number and not (work / "exports/pv" / f"layer{number}/ready.json").exists():
+        phase = (
+            "pv"
+            if (work / "exports/pv" / f"layer{number}/ready.json").exists()
+            else "initial"
+        )
+        if (
+            number
+            and not (work / "exports" / phase / f"layer{number}/ready.json").exists()
+        ):
             raise ValueError(f"Missing accepted export for layer {number}")
         layer = Layer(source, number, dev)
         if number == 0:
@@ -128,7 +136,11 @@ def main():
             output = layer.native_moe(flat, ids, gates)
             teacher = residual + output.reshape_as(residual).to(residual.dtype)
             layer.experts = None
-            selected = work / f"layer{number}_same_input/merged"
+            selected = (
+                work / f"layer{number}_same_input/merged"
+                if phase == "pv"
+                else work / "baseline/initial" / f"layer_{number:05d}"
+            )
             store = {}
             for key in ("w13", "w2"):
                 store.update(
