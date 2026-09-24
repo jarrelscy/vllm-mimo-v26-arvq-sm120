@@ -1,0 +1,63 @@
+{
+  "layer": 21,
+  "expert": 32,
+  "scope": "quality-only; no speed claim; planes generated from trellis symbols, not stored as extra weight arrays",
+  "candidates": [
+    {
+      "residual_shift": 2,
+      "scale": 0.5,
+      "symbol_relative_rms": 0.020223148180335736,
+      "validation": 0.06717658593050366,
+      "audit": 0.05650287475744963
+    },
+    {
+      "residual_shift": 2,
+      "scale": 1.0,
+      "symbol_relative_rms": 0.03959311991209478,
+      "validation": 0.07096243705692358,
+      "audit": 0.06112555673482052
+    },
+    {
+      "residual_shift": 3,
+      "scale": 0.5,
+      "symbol_relative_rms": 0.013526433892985499,
+      "validation": 0.06638744124594861,
+      "audit": 0.05565058931899065
+    },
+    {
+      "residual_shift": 3,
+      "scale": 1.0,
+      "symbol_relative_rms": 0.020223148180335736,
+      "validation": 0.06717658593050366,
+      "audit": 0.05650287475744963
+    },
+    {
+      "residual_shift": 4,
+      "scale": 0.5,
+      "symbol_relative_rms": 0.028292893919225407,
+      "validation": 0.06879161374827301,
+      "audit": 0.05857726866416859
+    },
+    {
+      "residual_shift": 4,
+      "scale": 1.0,
+      "symbol_relative_rms": 0.017066117929126916,
+      "validation": 0.06693821751709947,
+      "audit": 0.05619149526222065
+    },
+    {
+      "residual_shift": 5,
+      "scale": 0.5,
+      "symbol_relative_rms": 0.054112598237913506,
+      "validation": 0.0758811770304939,
+      "audit": 0.0677706770102052
+    },
+    {
+      "residual_shift": 5,
+      "scale": 1.0,
+      "symbol_relative_rms": 0.03375771242339372,
+      "validation": 0.0695781066349755,
+      "audit": 0.0602018765657724
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "layer": 21,
+  "expert": 201,
+  "backend": "fused_scatter",
+  "splits": 8,
+  "block_m": 16,
+  "block_n": 64,
+  "gpu": "NVIDIA B200",
+  "scope": "single-expert CUDA-graph latency; excludes routing and cross-GPU communication; dense baseline stores expanded weights",
+  "timings": [
+    {
+      "batch": 1,
+      "compressed_path_us": 84.03200149536133,
+      "reconstruct_each_call_us": 77.89247989654541,
+      "cached_dense_bf16_us": 30.729598999023438
+    },
+    {
+      "batch": 4,
+      "compressed_path_us": 88.17407608032227,
+      "reconstruct_each_call_us": 79.88448143005371,
+      "cached_dense_bf16_us": 30.7590389251709
+    },
+    {
+      "batch": 16,
+      "compressed_path_us": 90.17727851867676,
+      "reconstruct_each_call_us": 90.1750373840332,
+      "cached_dense_bf16_us": 39.923200607299805
+    },
+    {
+      "batch": 64,
+      "compressed_path_us": 237.70143508911133,
+      "reconstruct_each_call_us": 90.17760276794434,
+      "cached_dense_bf16_us": 36.87295913696289
+    },
+    {
+      "batch": 256,
+      "compressed_path_us": 872.9074859619141,
+      "reconstruct_each_call_us": 119.67391967773438,
+      "cached_dense_bf16_us": 52.87583827972412
+    }
+  ],
+  "quality": {
+    "validation": 0.09566731315411894,
+    "audit": 0.07435289850275885
+  }
+}

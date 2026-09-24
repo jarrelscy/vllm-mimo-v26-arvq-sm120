@@ -1,0 +1,131 @@
+{
+  "goal_passed": true,
+  "original_weights_per_expert": 37748736,
+  "verification_repeats": 2,
+  "experts": [
+    {
+      "layer": 21,
+      "expert": 137,
+      "artifact": "/data/jarrel/mimo-known-baselines-v1/block_allocation_layer21_expert137_lower1/joint/selected.bin",
+      "sha256": "d4137f44f8a33c515978cf45e99a40047ba39b09aacadc3c92592139e1c369df",
+      "codec": "blocks",
+      "bytes": 9425362,
+      "original_weights": 37748736,
+      "bpw": 1.997494591606988,
+      "all_2048_neurons_retained": true,
+      "coverage_exact": true,
+      "header_and_payload_accounted": true,
+      "measurements": {
+        "validation": {
+          "relative_rms": 0.05968083455966865,
+          "routed_rows": 213,
+          "error_norm": 0.274265237973462,
+          "reference_norm": 4.59553288751773
+        },
+        "audit": {
+          "relative_rms": 0.05683028227263896,
+          "routed_rows": 303,
+          "error_norm": 0.34323117805894987,
+          "reference_norm": 6.039582496041888
+        }
+      },
+      "passed": true,
+      "repeat": 0,
+      "reference": "decoded native MXFP4 weights with BF16 expert computation",
+      "scope": "Four development pilot experts; not fresh audit qualification or whole-model KL"
+    },
+    {
+      "layer": 21,
+      "expert": 201,
+      "artifact": "/data/jarrel/mimo-known-baselines-v1/two_sided_layer21_expert201_sigma0.1_out1/joint/selected.bin",
+      "sha256": "97ed29ea53be3e6edad509e49fc0e3881260ac8945940d9f7774c51a1e2ebb8e",
+      "codec": "contiguous",
+      "bytes": 9429272,
+      "original_weights": 37748736,
+      "bpw": 1.998323228624132,
+      "all_2048_neurons_retained": true,
+      "coverage_exact": true,
+      "header_and_payload_accounted": true,
+      "measurements": {
+        "validation": {
+          "relative_rms": 0.09557749274165882,
+          "routed_rows": 293,
+          "error_norm": 0.48425377198958514,
+          "reference_norm": 5.066608864688456
+        },
+        "audit": {
+          "relative_rms": 0.07442398551921532,
+          "routed_rows": 368,
+          "error_norm": 0.3760921286719891,
+          "reference_norm": 5.0533725928301285
+        }
+      },
+      "passed": true,
+      "repeat": 0,
+      "reference": "decoded native MXFP4 weights with BF16 expert computation",
+      "scope": "Four development pilot experts; not fresh audit qualification or whole-model KL"
+    },
+    {
+      "layer": 21,
+      "expert": 32,
+      "artifact": "/data/jarrel/mimo-known-baselines-v1/exl3_allocation_layer21_expert32/joint/selected.bin",
+      "sha256": "635fbbb9a1d15ecaa25c066c80060bb03c5b11653e5b212f8807981b5bea1f0e",
+      "codec": "contiguous",
+      "bytes": 9416990,
+      "original_weights": 37748736,
+      "bpw": 1.9957203335232205,
+      "all_2048_neurons_retained": true,
+      "coverage_exact": true,
+      "header_and_payload_accounted": true,
+      "measurements": {
+        "validation": {
+          "relative_rms": 0.0656189798397283,
+          "routed_rows": 282,
+          "error_norm": 0.35733876481492827,
+          "reference_norm": 5.445661692512041
+        },
+        "audit": {
+          "relative_rms": 0.05471264024506969,
+          "routed_rows": 275,
+          "error_norm": 0.3805732000296047,
+          "reference_norm": 6.9558551428871915
+        }
+      },
+      "passed": true,
+      "repeat": 0,
+      "reference": "decoded native MXFP4 weights with BF16 expert computation",
+      "scope": "Four development pilot experts; not fresh audit qualification or whole-model KL"
+    },
+    {
+      "layer": 69,
+      "expert": 19,
+      "artifact": "/data/jarrel/mimo-known-baselines-v1/block_allocation_layer69_expert19_lower1/joint/selected.bin",
+      "sha256": "652ba810d3183a43cf5e0959b84c988cb4b0e8dc76caef195620d6a57c79e75b",
+      "codec": "blocks",
+      "bytes": 9425362,
+      "original_weights": 37748736,
+      "bpw": 1.997494591606988,
+      "all_2048_neurons_retained": true,
+      "coverage_exact": true,
+      "header_and_payload_accounted": true,
+      "measurements": {
+        "validation": {
+          "relative_rms": 0.09356929823973498,
+          "routed_rows": 691,
+          "error_norm": 165.89719050131006,
+          "reference_norm": 1772.9874394939136
+        },
+        "audit": {
+          "relative_rms": 0.09455895833817517,
+          "routed_rows": 615,
+          "error_norm": 152.93398132435595,
+          "reference_norm": 1617.3399539513935
+        }
+      },
+      "passed": true,
+      "repeat": 0,
+      "reference": "decoded native MXFP4 weights with BF16 expert computation",
+      "scope": "Four development pilot experts; not fresh audit qualification or whole-model KL"
+    }
+  ]
+}

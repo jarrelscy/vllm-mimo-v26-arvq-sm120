@@ -80,7 +80,11 @@ CHECK_IMPORTS = {
         allowed_pattern=re.compile(
             "from vllm.triton_utils import (triton|tl|tl, triton)"
         ),
-        allowed_files={"vllm/triton_utils/importing.py"},
+        allowed_files={
+            "vllm/triton_utils/importing.py",
+            # Standalone EXL3 experiments run without installing vLLM.
+            "experiments/exl3-speed-v1/trellis_gemm.py",
+        },
     ),
 }
 

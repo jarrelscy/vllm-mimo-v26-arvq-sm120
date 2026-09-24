@@ -1,0 +1,22 @@
+{
+  "layer": 21,
+  "expert": 32,
+  "group_size": 16,
+  "scope": "FP4 operand numerical emulation on B200; no SM120 execution or speed claim; two weight planes, independently scaled activation planes",
+  "candidates": [
+    {
+      "activation_planes": 1,
+      "weight_planes": 2,
+      "mma_terms": 2,
+      "validation": 0.10548970356727741,
+      "audit": 0.09845815415139417
+    },
+    {
+      "activation_planes": 2,
+      "weight_planes": 2,
+      "mma_terms": 4,
+      "validation": 0.06731371171025427,
+      "audit": 0.056535413408429554
+    }
+  ]
+}
