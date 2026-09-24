@@ -1,0 +1,183 @@
+{
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+  "fp4": true,
+  "scope": "Synthetic one-projection timings, warm graphs; no routing/TP communication; Hadamard excludes fitted scales",
+  "rows": [
+    {
+      "m": 1,
+      "k": 6144,
+      "n": 512,
+      "input_hadamard_us": 1.9548800587654114,
+      "output_hadamard_us": 1.8265600502490997,
+      "separate_reduce_had_us": 4.105600118637085,
+      "fused_reduce_had_scatter_us": 2.070399969816208,
+      "decode_gemm_reduce_us": 22.541439533233643,
+      "complete_projection_us": 24.580159187316895
+    },
+    {
+      "m": 4,
+      "k": 6144,
+      "n": 512,
+      "input_hadamard_us": 1.8188799917697906,
+      "output_hadamard_us": 1.88960000872612,
+      "separate_reduce_had_us": 4.104639887809753,
+      "fused_reduce_had_scatter_us": 2.072640061378479,
+      "decode_gemm_reduce_us": 22.536640167236328,
+      "complete_projection_us": 24.578559398651123
+    },
+    {
+      "m": 16,
+      "k": 6144,
+      "n": 512,
+      "input_hadamard_us": 2.0716799795627594,
+      "output_hadamard_us": 1.9062399864196777,
+      "separate_reduce_had_us": 4.101119935512543,
+      "fused_reduce_had_scatter_us": 2.0739200711250305,
+      "decode_gemm_reduce_us": 22.53727912902832,
+      "complete_projection_us": 24.58143949508667
+    },
+    {
+      "m": 64,
+      "k": 6144,
+      "n": 512,
+      "input_hadamard_us": 4.105600118637085,
+      "output_hadamard_us": 1.9139200448989868,
+      "separate_reduce_had_us": 4.105280041694641,
+      "fused_reduce_had_scatter_us": 4.09824013710022,
+      "decode_gemm_reduce_us": 34.39327955245972,
+      "complete_projection_us": 36.879680156707764
+    },
+    {
+      "m": 1,
+      "k": 512,
+      "n": 6144,
+      "input_hadamard_us": 1.8083199858665466,
+      "output_hadamard_us": 2.008640021085739,
+      "separate_reduce_had_us": 4.106239974498749,
+      "fused_reduce_had_scatter_us": 2.078399956226349,
+      "decode_gemm_reduce_us": 14.343039989471436,
+      "complete_projection_us": 16.388479471206665
+    },
+    {
+      "m": 4,
+      "k": 512,
+      "n": 6144,
+      "input_hadamard_us": 1.7990399897098541,
+      "output_hadamard_us": 1.8979200720787048,
+      "separate_reduce_had_us": 4.09855991601944,
+      "fused_reduce_had_scatter_us": 4.105280041694641,
+      "decode_gemm_reduce_us": 14.347200393676758,
+      "complete_projection_us": 16.391040086746216
+    },
+    {
+      "m": 16,
+      "k": 512,
+      "n": 6144,
+      "input_hadamard_us": 1.8115200102329254,
+      "output_hadamard_us": 2.0691199600696564,
+      "separate_reduce_had_us": 4.116800129413605,
+      "fused_reduce_had_scatter_us": 4.115839898586273,
+      "decode_gemm_reduce_us": 14.362239837646484,
+      "complete_projection_us": 18.435839414596558
+    },
+    {
+      "m": 64,
+      "k": 512,
+      "n": 6144,
+      "input_hadamard_us": 1.8822400271892548,
+      "output_hadamard_us": 4.099520146846771,
+      "separate_reduce_had_us": 8.20352017879486,
+      "fused_reduce_had_scatter_us": 10.248960256576538,
+      "decode_gemm_reduce_us": 43.023037910461426,
+      "complete_projection_us": 48.38655948638916
+    },
+    {
+      "m": 1,
+      "k": 6144,
+      "n": 2048,
+      "input_hadamard_us": 1.8617600202560425,
+      "output_hadamard_us": 1.7878399789333344,
+      "separate_reduce_had_us": 4.100480079650879,
+      "fused_reduce_had_scatter_us": 2.072959989309311,
+      "decode_gemm_reduce_us": 34.783360958099365,
+      "complete_projection_us": 34.825921058654785
+    },
+    {
+      "m": 4,
+      "k": 6144,
+      "n": 2048,
+      "input_hadamard_us": 1.7795200645923615,
+      "output_hadamard_us": 1.7948800325393677,
+      "separate_reduce_had_us": 4.106239974498749,
+      "fused_reduce_had_scatter_us": 2.0796799659729004,
+      "decode_gemm_reduce_us": 34.62239980697632,
+      "complete_projection_us": 34.84031915664673
+    },
+    {
+      "m": 16,
+      "k": 6144,
+      "n": 2048,
+      "input_hadamard_us": 2.0720000565052032,
+      "output_hadamard_us": 1.8300800025463104,
+      "separate_reduce_had_us": 4.103679955005646,
+      "fused_reduce_had_scatter_us": 4.101440012454987,
+      "decode_gemm_reduce_us": 34.828479290008545,
+      "complete_projection_us": 36.87680006027222
+    },
+    {
+      "m": 64,
+      "k": 6144,
+      "n": 2048,
+      "input_hadamard_us": 4.102720022201538,
+      "output_hadamard_us": 2.0694400370121,
+      "separate_reduce_had_us": 5.071039795875549,
+      "fused_reduce_had_scatter_us": 6.147519946098328,
+      "decode_gemm_reduce_us": 92.1395206451416,
+      "complete_projection_us": 96.71263694763184
+    },
+    {
+      "m": 1,
+      "k": 2048,
+      "n": 6144,
+      "input_hadamard_us": 1.817920058965683,
+      "output_hadamard_us": 1.8083199858665466,
+      "separate_reduce_had_us": 4.0963199734687805,
+      "fused_reduce_had_scatter_us": 2.0694400370121,
+      "decode_gemm_reduce_us": 26.63424015045166,
+      "complete_projection_us": 28.68096113204956
+    },
+    {
+      "m": 4,
+      "k": 2048,
+      "n": 6144,
+      "input_hadamard_us": 1.903039962053299,
+      "output_hadamard_us": 1.8521599471569061,
+      "separate_reduce_had_us": 4.0988799929618835,
+      "fused_reduce_had_scatter_us": 4.101440012454987,
+      "decode_gemm_reduce_us": 26.642560958862305,
+      "complete_projection_us": 28.678081035614014
+    },
+    {
+      "m": 16,
+      "k": 2048,
+      "n": 6144,
+      "input_hadamard_us": 1.8131199479103088,
+      "output_hadamard_us": 2.064639925956726,
+      "separate_reduce_had_us": 4.121919870376587,
+      "fused_reduce_had_scatter_us": 4.0988799929618835,
+      "decode_gemm_reduce_us": 28.68191957473755,
+      "complete_projection_us": 30.725760459899902
+    },
+    {
+      "m": 64,
+      "k": 2048,
+      "n": 6144,
+      "input_hadamard_us": 2.0771199464797974,
+      "output_hadamard_us": 4.111999869346619,
+      "separate_reduce_had_us": 8.194239735603333,
+      "fused_reduce_had_scatter_us": 10.242880582809448,
+      "decode_gemm_reduce_us": 89.40704345703125,
+      "complete_projection_us": 94.47839736938477
+    }
+  ]
+}

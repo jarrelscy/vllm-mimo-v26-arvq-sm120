@@ -1,0 +1,12 @@
+{
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+  "native_sass": "OMMA.SF.16864.F32.E2M1.E2M1.E8",
+  "triton_fallback_sass": "HMMA.16816.F32.BF16",
+  "official_smoke": "passed rates 1.5/2/2.5, batches 1/4/16/64",
+  "native_parity": "passed rates 1.5/2/2.5, batches 1/4/7/8/9/16/64",
+  "partial_tiles": "passed N 16/48/80/192 and split K 3",
+  "fused_input_pack": "bit exact against official input Hadamard plus native pack, batches 1/9/64 with random nonuniform scales",
+  "memcheck_errors": 0,
+  "memcheck_allocator": "expandable_segments:False",
+  "quality_scope": "Synthetic FP4-plane parity only, not lossless EXL3 or fitted model quality"
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "rate": 1.5,
+    "exact_decode": true,
+    "pair_decode": true,
+    "activation_gemm_relative_l2": 0.0006590354023501277,
+    "max_abs": 0.035210371017456055
+  },
+  {
+    "rate": 2,
+    "exact_decode": true,
+    "pair_decode": true,
+    "activation_gemm_relative_l2": 0.0006499788141809404,
+    "max_abs": 0.04521369934082031
+  },
+  {
+    "rate": 2.5,
+    "exact_decode": true,
+    "pair_decode": true,
+    "activation_gemm_relative_l2": 0.0006696646451018751,
+    "max_abs": 0.032787322998046875
+  }
+]

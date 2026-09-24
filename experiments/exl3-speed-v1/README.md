@@ -2,8 +2,8 @@
 
 Target: SM120 (RTX PRO 6000 / RTX 50-series). This branch publishes research
 kernels, a checkpoint decoder, reproducible benchmark drivers, and measured
-B200 results. **There is no production vLLM integration or verified native
-SM120 FP4 kernel yet.** AI-assisted implementation; a human must review before
+B200 results. **There is no production vLLM integration. A native SM120 FP4 research
+kernel is now tested; see [SM120 results](SM120_RESULTS.md).** AI-assisted implementation; a human must review before
 any upstream contribution. This is a fork research branch, not an upstream PR.
 
 ## What changed

@@ -1,0 +1,182 @@
+{
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+  "scope": "Synthetic rate-2 single projections; official scaled Hadamard; no routing or TP communication",
+  "rows": [
+    {
+      "m": 1,
+      "k": 6144,
+      "n": 512,
+      "custom_fp16_relative_l2": 9.612284657123382e-07,
+      "official_hadamard_us": 2.0633600652217865,
+      "official_direct_us": 8.211519718170166,
+      "official_reconstruct_us": 12.29024052619934,
+      "custom_fp16_us": 16.406400203704834,
+      "custom_fp4_us": 24.579200744628906
+    },
+    {
+      "m": 4,
+      "k": 6144,
+      "n": 512,
+      "custom_fp16_relative_l2": 7.837136877242301e-07,
+      "official_hadamard_us": 1.9011199474334717,
+      "official_direct_us": 16.392639875411987,
+      "official_reconstruct_us": 10.263999700546265,
+      "custom_fp16_us": 16.403199434280396,
+      "custom_fp4_us": 24.58751916885376
+    },
+    {
+      "m": 16,
+      "k": 6144,
+      "n": 512,
+      "custom_fp16_relative_l2": 7.731879918537743e-07,
+      "official_hadamard_us": 1.950400024652481,
+      "official_direct_us": 22.527360916137695,
+      "official_reconstruct_us": 12.294080257415771,
+      "custom_fp16_us": 16.64479970932007,
+      "custom_fp4_us": 24.586238861083984
+    },
+    {
+      "m": 64,
+      "k": 6144,
+      "n": 512,
+      "custom_fp16_relative_l2": 7.07693516233121e-07,
+      "official_hadamard_us": 4.096960127353668,
+      "official_direct_us": 77.85088062286377,
+      "official_reconstruct_us": 14.343359470367432,
+      "custom_fp16_us": 25.39680004119873,
+      "custom_fp4_us": 36.876161098480225
+    },
+    {
+      "m": 1,
+      "k": 512,
+      "n": 6144,
+      "custom_fp16_relative_l2": 5.265606546345225e-07,
+      "official_hadamard_us": 2.035199999809265,
+      "official_direct_us": 6.166399717330933,
+      "official_reconstruct_us": 10.244159698486328,
+      "custom_fp16_us": 12.289600372314453,
+      "custom_fp4_us": 16.03808045387268
+    },
+    {
+      "m": 4,
+      "k": 512,
+      "n": 6144,
+      "custom_fp16_relative_l2": 5.135281071488862e-07,
+      "official_hadamard_us": 1.8988800048828125,
+      "official_direct_us": 10.325759649276733,
+      "official_reconstruct_us": 10.256960391998291,
+      "custom_fp16_us": 12.292799949645996,
+      "custom_fp4_us": 16.391680240631104
+    },
+    {
+      "m": 16,
+      "k": 512,
+      "n": 6144,
+      "custom_fp16_relative_l2": 5.162825686966244e-07,
+      "official_hadamard_us": 2.0870399475097656,
+      "official_direct_us": 10.258239507675171,
+      "official_reconstruct_us": 12.298239469528198,
+      "custom_fp16_us": 14.34048056602478,
+      "custom_fp4_us": 18.405760526657104
+    },
+    {
+      "m": 64,
+      "k": 512,
+      "n": 6144,
+      "custom_fp16_relative_l2": 5.250753929431085e-07,
+      "official_hadamard_us": 1.9340799748897552,
+      "official_direct_us": 28.679358959197998,
+      "official_reconstruct_us": 12.28991985321045,
+      "custom_fp16_us": 34.883201122283936,
+      "custom_fp4_us": 47.429118156433105
+    },
+    {
+      "m": 1,
+      "k": 6144,
+      "n": 2048,
+      "custom_fp16_relative_l2": 9.872927648757468e-07,
+      "official_hadamard_us": 1.8646399676799774,
+      "official_direct_us": 10.247360467910767,
+      "official_reconstruct_us": 20.483839511871338,
+      "custom_fp16_us": 22.62943983078003,
+      "custom_fp4_us": 34.85919952392578
+    },
+    {
+      "m": 4,
+      "k": 6144,
+      "n": 2048,
+      "custom_fp16_relative_l2": 7.061374276418064e-07,
+      "official_hadamard_us": 1.8425600230693817,
+      "official_direct_us": 16.393920183181763,
+      "official_reconstruct_us": 20.5731201171875,
+      "custom_fp16_us": 22.654719352722168,
+      "custom_fp4_us": 34.845120906829834
+    },
+    {
+      "m": 16,
+      "k": 6144,
+      "n": 2048,
+      "custom_fp16_relative_l2": 7.053535568957159e-07,
+      "official_hadamard_us": 1.9814400374889374,
+      "official_direct_us": 22.53472089767456,
+      "official_reconstruct_us": 24.58911895751953,
+      "custom_fp16_us": 24.58240032196045,
+      "custom_fp4_us": 36.88767910003662
+    },
+    {
+      "m": 64,
+      "k": 6144,
+      "n": 2048,
+      "custom_fp16_relative_l2": 5.93815968841227e-07,
+      "official_hadamard_us": 4.099839925765991,
+      "official_direct_us": 77.89087772369385,
+      "official_reconstruct_us": 24.679999351501465,
+      "custom_fp16_us": 61.06048107147217,
+      "custom_fp4_us": 96.41728401184082
+    },
+    {
+      "m": 1,
+      "k": 2048,
+      "n": 6144,
+      "custom_fp16_relative_l2": 2.1802020455652382e-06,
+      "official_hadamard_us": 1.9897599518299103,
+      "official_direct_us": 8.214399814605713,
+      "official_reconstruct_us": 20.501439571380615,
+      "custom_fp16_us": 20.000319480895996,
+      "custom_fp4_us": 28.680639266967773
+    },
+    {
+      "m": 4,
+      "k": 2048,
+      "n": 6144,
+      "custom_fp16_relative_l2": 2.225705657110666e-06,
+      "official_hadamard_us": 1.8988800048828125,
+      "official_direct_us": 14.3612802028656,
+      "official_reconstruct_us": 23.120639324188232,
+      "custom_fp16_us": 20.486080646514893,
+      "custom_fp4_us": 28.681280612945557
+    },
+    {
+      "m": 16,
+      "k": 2048,
+      "n": 6144,
+      "custom_fp16_relative_l2": 2.202526729888632e-06,
+      "official_hadamard_us": 1.9315199553966522,
+      "official_direct_us": 16.39232039451599,
+      "official_reconstruct_us": 24.596478939056396,
+      "custom_fp16_us": 21.631360054016113,
+      "custom_fp4_us": 30.736958980560303
+    },
+    {
+      "m": 64,
+      "k": 2048,
+      "n": 6144,
+      "custom_fp16_relative_l2": 2.2134286155051086e-06,
+      "official_hadamard_us": 2.067839950323105,
+      "official_direct_us": 53.2422399520874,
+      "official_reconstruct_us": 24.559040069580078,
+      "custom_fp16_us": 63.17408084869385,
+      "custom_fp4_us": 94.24991607666016
+    }
+  ]
+}
