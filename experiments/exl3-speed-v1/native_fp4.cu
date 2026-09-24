@@ -60,9 +60,11 @@ __device__ void pack_body(const half* x, unsigned* out, unsigned char* scales,
     float peak = fabsf(value);
     for (int delta = GROUP / 2; delta; delta /= 2)
       peak = fmaxf(peak, __shfl_xor_sync(0xffffffff, peak, delta));
-    int e = (int)ceilf(log2f(fmaxf(peak / 6, 0x1p-24f)));
+    unsigned exponent_bits = __float_as_uint(fmaxf(peak / 6, 0x1p-24f));
+    int e = int(exponent_bits >> 23) - 127 + ((exponent_bits & 0x7fffff) != 0);
     if constexpr (ARVQ) e = max(-6, min(8, e));
-    float scale = exp2f((float)e), v = fabsf(value) / scale;
+    float scale = __uint_as_float(unsigned(e + 127) << 23);
+    float v = fabsf(value) * __uint_as_float(unsigned(127 - e) << 23);
     unsigned q = (v > .25f) + (v > .75f) + (v > 1.25f) + (v > 1.75f) +
                  (v > 2.5f) + (v > 3.5f) + (v > 5.f);
     q |= value < 0 ? 8 : 0;
@@ -111,20 +113,25 @@ __device__ __forceinline__ unsigned compact_nibbles(unsigned x) {
 }
 
 __device__ __forceinline__ void prefetch_words(const unsigned* packed,
-                                               unsigned* left, unsigned* right,
-                                               int g, int c, int q, int tile,
-                                               int N) {
+                                               unsigned* windows, int g, int c,
+                                               int q, int tile, int N) {
+  int lane = threadIdx.x & 31;
+  unsigned w0 =
+      packed[((g * 4 + lane / 16) * (N / 16) + tile) * 16 + lane % 16];
+  unsigned w1 =
+      packed[((g * 4 + 2 + lane / 16) * (N / 16) + tile) * 16 + lane % 16];
 #pragma unroll
   for (int h = 0; h < 2; ++h) {
-    int k = g * 64 + c * 8 + h * 32;
 #pragma unroll
     for (int t = 0; t < 8; t += 2) {
-      int r = (k + t) & 15;
+      int r = (c * 8 + t) & 15;
       int pos = (q * 4 + (r % 8) / 2) * 8 + 2 * (r / 8);
       int end = (pos + 6) * 2;
-      const unsigned* src = packed + (((k + t) / 16) * (N / 16) + tile) * 16;
-      left[h * 4 + t / 2] = src[((end - 26 + 512) / 32) & 15];
-      right[h * 4 + t / 2] = src[((end - 1) / 32) & 15];
+      int li = (((end - 26 + 512) / 32) & 15) + (c / 2) * 16;
+      int ri = (((end - 1) / 32) & 15) + (c / 2) * 16;
+      unsigned left = __shfl_sync(0xffffffff, h ? w1 : w0, li);
+      unsigned right = __shfl_sync(0xffffffff, h ? w1 : w0, ri);
+      windows[h * 4 + t / 2] = __funnelshift_r(right, left, 32 - end % 32);
     }
   }
 }
@@ -133,34 +140,26 @@ template <int KA, int HALF, bool ARVQ = false, bool GEMV = false>
 __device__ void project_body(const unsigned* packed, const unsigned char* table,
                              const unsigned* x, const unsigned char* xs,
                              float* partial, int M, int N, int K, int S, int bx,
-                             int by, int bz) {
+                             int by, int bz, int activation_stride = 0,
+                             int activation_offset = 0) {
+  if (!activation_stride) activation_stride = K;
   const unsigned char* lut = table;
   int lane = threadIdx.x % 32, q = lane / 4, c = lane % 4;
-  int tile = bx * 4 + threadIdx.x / 32;
+  int tile = bx + threadIdx.x / 32;
   if (tile >= N / 16) return;
   int token = bz * 8 + q, G = K / 64;
   float d[4] = {};
-  unsigned ahead_left[8], ahead_right[8];
-  if constexpr (GEMV)
-    prefetch_words(packed, ahead_left, ahead_right, G * by / S, c, q, tile, N);
+  unsigned ahead[8];
+  if constexpr (GEMV) prefetch_words(packed, ahead, G * by / S, c, q, tile, N);
   for (int g = G * by / S; g < G * (by + 1) / S; ++g) {
     unsigned a[4] = {}, b[4] = {};
     if constexpr (GEMV) {
       // Four neighboring trellis states feed both halves of the MMA row tile.
 #pragma unroll
       for (int h = 0; h < 2; ++h) {
-        int k = g * 64 + c * 8 + h * 32;
 #pragma unroll
         for (int t = 0; t < 8; t += 2) {
-          int r = (k + t) & 15;
-          int pos = (q * 4 + (r % 8) / 2) * 8 + 2 * (r / 8);
-          int end = (pos + 6) * 2;
-          unsigned left = ahead_left[h * 4 + t / 2];
-          unsigned right = ahead_right[h * 4 + t / 2];
-          unsigned window = end % 32 == 0
-                                ? right
-                                : (unsigned)((((uint64_t)left << 32) | right) >>
-                                             (32 - end % 32));
+          unsigned window = ahead[h * 4 + t / 2];
 #pragma unroll
           for (int row = 0; row < 2; ++row) {
 #pragma unroll
@@ -197,17 +196,19 @@ __device__ void project_body(const unsigned* packed, const unsigned char* table,
     }
     if constexpr (GEMV) {
       if (g + 1 < G * (by + 1) / S)
-        prefetch_words(packed, ahead_left, ahead_right, g + 1, c, q, tile, N);
+        prefetch_words(packed, ahead, g + 1, c, q, tile, N);
     }
     if constexpr (ARVQ) {
       int plane_slot = bz * 8 + q;
-      int base = (plane_slot * K + g * 64) / 8;
+      int base =
+          (plane_slot * activation_stride + g * 64 - activation_offset) / 8;
       bool valid = plane_slot < M * 4;
       unsigned b0 = valid ? x[base + c] : 0;
       unsigned b1 = valid ? x[base + c + 4] : 0;
-      unsigned sb =
-          valid ? reinterpret_cast<const unsigned*>(xs)[plane_slot * G + g]
-                : 0x38383838u;
+      unsigned sb = valid ? reinterpret_cast<const unsigned*>(
+                                xs)[plane_slot * (activation_stride / 64) + g -
+                                    activation_offset / 64]
+                          : 0x38383838u;
       mma_arvq(d, a, b0, b1, 0x38383838u, sb);
       mma_arvq(d, b, b0, b1, 0x18181818u, sb);
     } else {
@@ -225,8 +226,10 @@ __device__ void project_body(const unsigned* packed, const unsigned char* table,
   }
   if constexpr (ARVQ) {
     // Each pair of lanes covers the four residual planes of one token.
-    float lo = ldexpf(d[0], -8 * (c % 2)) + ldexpf(d[1], -8 * (c % 2) - 4);
-    float hi = ldexpf(d[2], -8 * (c % 2)) + ldexpf(d[3], -8 * (c % 2) - 4);
+    float scale0 = (c & 1) ? 0x1p-8f : 1.f;
+    float scale1 = (c & 1) ? 0x1p-12f : 0x1p-4f;
+    float lo = __fadd_rn(__fmul_rn(d[0], scale0), __fmul_rn(d[1], scale1));
+    float hi = __fadd_rn(__fmul_rn(d[2], scale0), __fmul_rn(d[3], scale1));
     lo += __shfl_xor_sync(0xffffffff, lo, 1);
     hi += __shfl_xor_sync(0xffffffff, hi, 1);
     int m = bz * 2 + c / 2;
@@ -248,15 +251,16 @@ template <int KA, int HALF, bool ARVQ = false, bool GEMV = false>
 __global__ void project(const unsigned* packed, const unsigned char* table,
                         const unsigned* x, const unsigned char* xs,
                         float* partial, int M, int N, int K, int S) {
-  __shared__ unsigned char local_lut[1024];
+  __shared__ unsigned char local[1024];
   if constexpr (GEMV) {
-    reinterpret_cast<unsigned long long*>(local_lut)[threadIdx.x] =
-        reinterpret_cast<const unsigned long long*>(table)[threadIdx.x];
+    for (int t = threadIdx.x; t < 128; t += blockDim.x)
+      reinterpret_cast<unsigned long long*>(local)[t] =
+          reinterpret_cast<const unsigned long long*>(table)[t];
     __syncthreads();
   }
-  project_body<KA, HALF, ARVQ, GEMV>(packed, GEMV ? local_lut : table, x, xs,
-                                     partial, M, N, K, S, blockIdx.x,
-                                     blockIdx.y, blockIdx.z);
+  project_body<KA, HALF, ARVQ, GEMV>(
+      packed, GEMV ? local : table, x, xs, partial, M, N, K, S,
+      blockIdx.x * (blockDim.x / 32), blockIdx.y, blockIdx.z);
 }
 
 extern "C" int exl3_pack(const void* x, void* out, void* scales, int M, int K,
@@ -335,18 +339,18 @@ extern "C" int exl3_arvq_project(const void* packed, const void* lut,
 extern "C" int exl3_fp4_gemv(const void* packed, const void* lut, const void* x,
                              const void* xs, void* partial, int M, int N, int K,
                              int S, int rate2, void* stream) {
-  if (M != 1 || rate2 != 4 || N < 16 || N % 16 || K < 128 || K % 128 || S < 1 ||
+  if (M < 1 || rate2 != 4 || N < 16 || N % 16 || K < 128 || K % 128 || S < 1 ||
       S > K / 64)
     return cudaErrorInvalidValue;
-  dim3 grid((N + 63) / 64, S, 1);
+  dim3 grid((N + 63) / 64, S, (M + 1) / 2);
   project<2, 0, true, true><<<grid, 128, 0, (cudaStream_t)stream>>>(
       (const unsigned*)packed, (const unsigned char*)lut, (const unsigned*)x,
-      (const unsigned char*)xs, (float*)partial, 1, N, K, S);
+      (const unsigned char*)xs, (float*)partial, M, N, K, S);
   return cudaGetLastError();
 }
 
 __device__ __noinline__ float output_hadamard(float value) {
-  __shared__ float exchange[128];
+  __shared__ float exchange[256];
   for (int stride = 1; stride <= 16; stride *= 2) {
     float other = __shfl_xor_sync(0xffffffff, value, stride);
     value = (threadIdx.x & stride) ? other - value : value + other;
@@ -376,7 +380,7 @@ __global__ void fused_gemv(const half* input, const half* su, const half* sv,
   int tiles = (N + 63) / 64;
   for (int task = blockIdx.x; task < tiles * S; task += gridDim.x) {
     project_body<2, 0, true, true>(packed, lut, q, qs, partial, 1, N, K, S,
-                                   task % tiles, task / tiles, 0);
+                                   (task % tiles) * 4, task / tiles, 0);
   }
   grid.sync();
   for (int b = blockIdx.x; b < N / 128; b += gridDim.x) {
@@ -415,22 +419,25 @@ __global__ void cta_fused_gemv(const half* input, const half* su,
                                const half* sv, const unsigned* packed,
                                const unsigned char* table, float* partial,
                                float* output, unsigned* counters, int N, int K,
-                               int S) {
-  __shared__ unsigned q[4 * 6144 / 8];
-  __shared__ unsigned char qs[4 * 6144 / 16];
+                               int S, int capacity) {
+  extern __shared__ unsigned q[];
+  unsigned char* qs = reinterpret_cast<unsigned char*>(q + 4 * capacity / 8);
   __shared__ unsigned char lut[1024];
   __shared__ int last;
   reinterpret_cast<unsigned long long*>(lut)[threadIdx.x] =
       reinterpret_cast<const unsigned long long*>(table)[threadIdx.x];
   int G = K / 64;
   int start = G * blockIdx.y / S, stop = G * (blockIdx.y + 1) / S;
-  for (int b = start / 2; b < (stop + 1) / 2; ++b)
-    pack_body<true, true>(input, q, qs, K, 1, su, b);
+  int offset = start / 2 * 128;
+  int chunk = ((stop + 1) / 2) * 128 - offset;
+  for (int b = 0; b < chunk / 128; ++b)
+    pack_body<true, true>(input + offset, q, qs, chunk, 1, su + offset, b);
   __syncthreads();
   project_body<2, 0, true, true>(packed, lut, q, qs, partial, 1, N, K, S,
-                                 blockIdx.x * 2, blockIdx.y, 0);
+                                 blockIdx.x * 8, blockIdx.y, 0, chunk, offset);
   project_body<2, 0, true, true>(packed, lut, q, qs, partial, 1, N, K, S,
-                                 blockIdx.x * 2 + 1, blockIdx.y, 0);
+                                 blockIdx.x * 8 + 4, blockIdx.y, 0, chunk,
+                                 offset);
   __threadfence();
   __syncthreads();
   if (threadIdx.x == 0) last = atomicInc(counters + blockIdx.x, S - 1) == S - 1;
@@ -453,9 +460,11 @@ extern "C" int exl3_fp4_cta_fused(const void* input, const void* su,
   if (N < 128 || N % 128 || K < 128 || K % 128 || K > 6144 || S < 1 ||
       S > K / 64)
     return cudaErrorInvalidValue;
-  cta_fused_gemv<<<dim3(N / 128, S), 128, 0, (cudaStream_t)stream>>>(
+  int capacity = min(K, (((K / 64 + S - 1) / S + 2) / 2) * 128);
+  cta_fused_gemv<<<dim3(N / 128, S), 128, capacity * 9 / 4,
+                   (cudaStream_t)stream>>>(
       (const half*)input, (const half*)su, (const half*)sv,
       (const unsigned*)packed, (const unsigned char*)lut, (float*)partial,
-      (float*)output, (unsigned*)counters, N, K, S);
+      (float*)output, (unsigned*)counters, N, K, S, capacity);
   return cudaGetLastError();
 }

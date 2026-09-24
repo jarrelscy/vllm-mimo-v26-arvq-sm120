@@ -1,0 +1,12 @@
+{
+  "scope": "Synthetic SM120 projection, warm graphs",
+  "multi_token_memcheck": "0 errors, bit-exact versus generic FP4 at batches 1,2,3,4,5,8",
+  "cta_racecheck": "0 hazards; 0 errors; 0 warnings",
+  "packer_vs_a187767": "All 63,488 finite FP16 values, sorted and shuffled, match exactly; fused signed-scale cases also match",
+  "confirmed_two_token_speedups": {
+    "6144_to_2048": 1.307287953942958,
+    "512_to_6144": 1.2493123945347342
+  },
+  "batch_one": "Still slower than official EXL3",
+  "original_exl3_lossless": false
+}

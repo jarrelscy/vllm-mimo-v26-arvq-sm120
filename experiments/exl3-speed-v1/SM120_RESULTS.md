@@ -212,3 +212,64 @@ whole-model quality, serving integration, or concurrent workspace safety.
 .venv/bin/python sm120_fused_test.py --cta --parity-only
 .venv/bin/python sm120_fused_test.py
 ```
+
+## Confirmed two-token win (follow-up)
+
+The rate-2 specialized path now supports multiple tokens with two tokens per
+MMA tile. It cooperatively loads each compressed word once per warp, broadcasts
+it to decoding lanes, and extracts trellis windows with a funnel shift. The
+prefetch buffer holds eight assembled windows rather than sixteen source words.
+Power-of-two activation scale construction uses exponent bits, and the plane
+reduction uses explicit rounded multiplication rather than variable `ldexpf`.
+The fused experimental path allocates shared activation storage for its actual
+K slice rather than the whole input width.
+
+**The confirmed win is at batch two, not batch one.** Three random seeds with
+nonuniform signed scales, alternating benchmark order, and comparison against
+the faster of official direct/reconstruction paths give these median latencies:
+
+| K → N, two tokens | Native FP4 | Best official | Throughput ratio |
+| --- | ---: | ---: | ---: |
+| 6144 → 2048 | 12.296 us | 16.075 us | 1.31x |
+| 512 → 6144 | 8.202 us | 10.247 us | 1.25x |
+
+All six comparisons at each shape favor FP4. The measured ranges are
+12.291–12.302 versus 15.907–16.344 us for the larger projection, and
+8.192–8.222 versus 10.241–10.254 us for the smaller one. These wins use
+`project(..., arvq=True, gemv=True)` with splits 32 and 8 respectively, including
+input/output Hadamard transforms and activation packing. They use the ordinary
+three-launch path, not the experimental whole-projection fusion.
+
+The broader sweep is in `multi_token.json`: batch-one native FP4 still loses;
+the 2048→6144 projection at batch two roughly ties. Batch-four results mostly tie
+or lose, and batch eight loses. These are shape-specific microbenchmark wins,
+not evidence of a faster full model or better quantization accuracy. Native FP4
+still approximates the original EXL3 codewords and activations.
+
+Hardware profiling was possible through a privileged `docker exec` of the
+isolated benchmark process; no host settings or serving container were changed.
+The global-LUT profile identified substantial L1/TEX dependency stalls. The
+shared-LUT profile removed that specific recommendation but still showed less
+than one full scheduling wave at the tested launch size. Nsight replay durations
+are not the warm-graph benchmark durations and must not replace the timing table.
+
+Further experiments retained only as local scratch included a separate-pack
+kernel with fused output completion, and an eight-warp full-fusion block. Neither
+won. Sweeping 32/64/128/256-thread blocks also did not solve the batch-one gap.
+
+The exponent-bit packer matches commit `a187767` bit-for-bit for all 63,488 finite
+FP16 patterns, both ordered and shuffled into groups, and for tested fused input
+transforms. Specialized multi-token outputs match the generic FP4 path exactly
+in the tested shapes. Full fusion retains its tolerance-based comparison.
+
+```bash
+.venv/bin/python sm120_multi_token_test.py
+.venv/bin/python sm120_confirm_two.py
+.venv/bin/python sm120_multi_token_test.py --parity-only
+# Optional packer regression against the prior implementation:
+git show a187767:experiments/exl3-speed-v1/native_fp4.cu > local-results/baseline_a187.cu
+nvcc -O3 -std=c++17 --shared -Xcompiler=-fPIC \
+  -gencode arch=compute_120a,code=sm_120a \
+  local-results/baseline_a187.cu -o local-results/baseline_a187.so
+.venv/bin/python sm120_pack_regression.py
+```

@@ -98,7 +98,7 @@ def project(
     n = packed.shape[1] * 16
     assert 1 <= splits <= k // 64
     if gemv:
-        assert arvq and m == 1 and packed.shape[2] == 32
+        assert arvq and m >= 1 and packed.shape[2] == 32
     q, xs = pack(x, input_scales, arvq)
     scratch = torch.empty((splits, m, n), device=x.device, dtype=torch.float32)
     out = torch.empty((m, n), device=x.device, dtype=torch.float32)
