@@ -136,7 +136,9 @@ __device__ __forceinline__ void prefetch_words(const unsigned* packed,
   }
 }
 
-template <int KA, int HALF, bool ARVQ = false, bool GEMV = false>
+template <int KA, int HALF, bool ARVQ = false, bool GEMV = false,
+          unsigned SA0 = 0x38383838u, unsigned SA1 = 0x18181818u,
+          bool ADD = false>
 __device__ void project_body(const unsigned* packed, const unsigned char* table,
                              const unsigned* x, const unsigned char* xs,
                              float* partial, int M, int N, int K, int S, int bx,
@@ -209,8 +211,8 @@ __device__ void project_body(const unsigned* packed, const unsigned char* table,
                                 xs)[plane_slot * (activation_stride / 64) + g -
                                     activation_offset / 64]
                           : 0x38383838u;
-      mma_arvq(d, a, b0, b1, 0x38383838u, sb);
-      mma_arvq(d, b, b0, b1, 0x18181818u, sb);
+      mma_arvq(d, a, b0, b1, SA0, sb);
+      mma_arvq(d, b, b0, b1, SA1, sb);
     } else {
 #pragma unroll
       for (int p = 0; p < 2; ++p) {
@@ -234,8 +236,14 @@ __device__ void project_body(const unsigned* packed, const unsigned char* table,
     hi += __shfl_xor_sync(0xffffffff, hi, 1);
     int m = bz * 2 + c / 2;
     if (!(c & 1) && m < M) {
-      partial[(by * M + m) * N + tile * 16 + q] = lo;
-      partial[(by * M + m) * N + tile * 16 + q + 8] = hi;
+      int offset = (by * M + m) * N + tile * 16 + q;
+      if constexpr (ADD) {
+        partial[offset] += lo;
+        partial[offset + 8] += hi;
+      } else {
+        partial[offset] = lo;
+        partial[offset + 8] = hi;
+      }
     }
   } else {
 #pragma unroll
@@ -660,5 +668,103 @@ extern "C" int exl3_grouped_sum(const void* values, const void* weights,
   grouped_sum<<<(M * H + 255) / 256, 256, 0, (cudaStream_t)stream>>>(
       (const float*)values, (const half*)weights, (const int*)inverse,
       (float*)output, M, topk, H);
+  return cudaGetLastError();
+}
+
+// Four weight components use exponents [0,-3,-6,-9]. E4M3 encodes
+// 2^-9 as subnormal byte 0x01. The original two-component path is unchanged.
+template <int KA, int HALF, int COMPONENTS, bool GEMV>
+__device__ void component_body(const unsigned* packed, const unsigned char* lut,
+                               const unsigned* q, const unsigned char* qs,
+                               float* partial, int M, int N, int K, int S,
+                               int bx, int by, int bz) {
+  if constexpr (COMPONENTS == 2) {
+    project_body<KA, HALF, true, GEMV>(packed, lut, q, qs, partial, M, N, K, S,
+                                       bx, by, bz);
+  } else {
+    project_body<KA, HALF, true, GEMV, 0x38383838u, 0x20202020u>(
+        packed, lut, q, qs, partial, M, N, K, S, bx, by, bz);
+    project_body<KA, HALF, true, GEMV, 0x08080808u, 0x01010101u, true>(
+        packed, lut + 1024, q, qs, partial, M, N, K, S, bx, by, bz);
+  }
+}
+
+template <int COMPONENTS>
+__global__ void grouped_components(const unsigned* packed,
+                                   const unsigned char* table,
+                                   const unsigned* q, const unsigned char* qs,
+                                   const int* ids, const int* offsets,
+                                   const int* groups, float* partial, int N,
+                                   int K, int S, int lut_stride) {
+  int row = blockIdx.z, group = groups[row];
+  int first = offsets[group], count = offsets[group + 1] - first;
+  int rank = row - first;
+  if (rank & 1) return;
+  __shared__ unsigned char lut[COMPONENTS / 2 * 1024];
+  const unsigned char* source = table + (size_t)ids[group] * lut_stride;
+  for (int i = threadIdx.x; i < COMPONENTS / 2 * 128; i += blockDim.x)
+    reinterpret_cast<unsigned long long*>(lut)[i] =
+        reinterpret_cast<const unsigned long long*>(source)[i];
+  __syncthreads();
+  component_body<2, 0, COMPONENTS, true>(
+      packed + (size_t)ids[group] * K * N / 16, lut, q + first * (4 * K / 8),
+      qs + first * (4 * K / 16), partial + (size_t)first * S * N, count, N, K,
+      S, blockIdx.x * 4, blockIdx.y, rank / 2);
+}
+
+extern "C" int exl3_grouped_project_components(
+    const void* packed, const void* lut, const void* q, const void* qs,
+    const void* ids, const void* offsets, const void* groups, void* partial,
+    int R, int N, int K, int S, int components, int lut_stride, void* stream) {
+  if (R < 1 || N < 128 || N % 128 || K < 128 || K % 128 || S < 1 ||
+      S > K / 64 || (components != 2 && components != 4) ||
+      (lut_stride != 0 && lut_stride != components / 2 * 1024))
+    return cudaErrorInvalidValue;
+#define LAUNCH_COMPONENTS(C)                                                 \
+  grouped_components<C>                                                      \
+      <<<dim3((N + 63) / 64, S, R), 128, 0, (cudaStream_t)stream>>>(         \
+          (const unsigned*)packed, (const unsigned char*)lut,                \
+          (const unsigned*)q, (const unsigned char*)qs, (const int*)ids,     \
+          (const int*)offsets, (const int*)groups, (float*)partial, N, K, S, \
+          lut_stride)
+  if (components == 2) {
+    LAUNCH_COMPONENTS(2);
+  } else {
+    LAUNCH_COMPONENTS(4);
+  }
+#undef LAUNCH_COMPONENTS
+  return cudaGetLastError();
+}
+
+template <int KA, int HALF>
+__global__ void project_four(const unsigned* packed, const unsigned char* lut,
+                             const unsigned* q, const unsigned char* qs,
+                             float* partial, int M, int N, int K, int S) {
+  component_body<KA, HALF, 4, false>(packed, lut, q, qs, partial, M, N, K, S,
+                                     blockIdx.x * 4, blockIdx.y, blockIdx.z);
+}
+extern "C" int exl3_arvq_project_four(const void* packed, const void* lut,
+                                      const void* q, const void* qs,
+                                      void* partial, int M, int N, int K, int S,
+                                      int rate2, void* stream) {
+  if (M < 1 || N < 16 || N % 16 || K < 128 || K % 128 || S < 1 || S > K / 64 ||
+      rate2 < 3 || rate2 > 5)
+    return cudaErrorInvalidValue;
+#define LAUNCH_FOUR(A, B)                                                      \
+  project_four<A, B>                                                           \
+      <<<dim3((N + 63) / 64, S, (M + 1) / 2), 128, 0, (cudaStream_t)stream>>>( \
+          (const unsigned*)packed, (const unsigned char*)lut,                  \
+          (const unsigned*)q, (const unsigned char*)qs, (float*)partial, M, N, \
+          K, S)
+  if (rate2 == 3) {
+    LAUNCH_FOUR(1, 1);
+  }
+  if (rate2 == 4) {
+    LAUNCH_FOUR(2, 0);
+  }
+  if (rate2 == 5) {
+    LAUNCH_FOUR(2, 1);
+  }
+#undef LAUNCH_FOUR
   return cudaGetLastError();
 }

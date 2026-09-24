@@ -7,6 +7,7 @@ from pathlib import Path
 
 import torch
 from trellis_gemm import reduce, reduce_had_scatter
+from weight_components import validate_lut
 
 _lib = ctypes.CDLL(str(Path(__file__).parent / "local-results/native_fp4.so"))
 _lib.exl3_pack.argtypes = [ctypes.c_void_p] * 3 + [ctypes.c_int] * 2 + [ctypes.c_void_p]
@@ -22,6 +23,7 @@ _lib.exl3_had_pack.argtypes = (
 
 _lib.exl3_arvq_pack.argtypes = _lib.exl3_had_pack.argtypes
 _lib.exl3_arvq_project.argtypes = _lib.exl3_project.argtypes
+_lib.exl3_arvq_project_four.argtypes = _lib.exl3_project.argtypes
 _lib.exl3_fp4_gemv.argtypes = _lib.exl3_project.argtypes
 
 
@@ -89,9 +91,12 @@ def project(
     input_scales=None,
     arvq=False,
     gemv=False,
+    weight_components=2,
 ):
     assert packed.is_contiguous() and packed.dtype == torch.int16
-    assert lut.is_contiguous() and lut.dtype == torch.uint8 and lut.numel() == 1024
+    validate_lut(lut, weight_components)
+    if weight_components == 4 and not arvq:
+        raise ValueError("Four weight components require four-plane ARVQ activations")
     assert x.device == packed.device == lut.device
     m, k = x.shape
     assert packed.shape[0] * 16 == k and packed.shape[2] in (24, 32, 40)
@@ -108,6 +113,8 @@ def project(
             if gemv
             else (_lib.exl3_arvq_project if arvq else _lib.exl3_project)
         )
+        if weight_components == 4:
+            fn = _lib.exl3_arvq_project_four
         code = fn(
             packed.data_ptr(),
             lut.data_ptr(),

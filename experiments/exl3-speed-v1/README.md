@@ -195,3 +195,9 @@ After removing temporary-script dependencies and formatting the published files:
   quality and timing. JSON is in `results/handoff-verification/`.
 
 Current user priority: **MiMo v2.6 Pro first**. GLM 5.3 is a later comparison.
+
+## Locally fitted FP4 codebooks
+
+See [weight component support](WEIGHT_COMPONENTS.md) for shared or per-expert
+codebooks with two or four FP4 weight components, API examples and validation
+status. Four-component support is experimental pending native SM120 checks.
