@@ -468,3 +468,197 @@ extern "C" int exl3_fp4_cta_fused(const void* input, const void* su,
       (float*)output, (unsigned*)counters, N, K, S, capacity);
   return cudaGetLastError();
 }
+
+__global__ void grouped_pack(const half* input, const half* su, const int* ids,
+                             const int* group_for_row, unsigned* q,
+                             unsigned char* qs, int K,
+                             const int* gather = nullptr) {
+  int row = blockIdx.y;
+  int physical = ids[group_for_row[row]];
+  pack_body<true, true>(input + (gather ? gather[row] : row) * K,
+                        q + row * (4 * K / 8), qs + row * (4 * K / 16), K, 1,
+                        su + physical * K, blockIdx.x);
+}
+
+__global__ void grouped_project(const unsigned* packed,
+                                const unsigned char* table, const unsigned* q,
+                                const unsigned char* qs, const int* ids,
+                                const int* offsets, const int* group_for_row,
+                                float* partial, int N, int K, int S) {
+  int row = blockIdx.z, group = group_for_row[row];
+  int first = offsets[group], count = offsets[group + 1] - first;
+  int rank = row - first;
+  if (rank & 1) return;
+  int pair = rank / 2;
+  __shared__ unsigned char lut[1024];
+  reinterpret_cast<unsigned long long*>(lut)[threadIdx.x] =
+      reinterpret_cast<const unsigned long long*>(table)[threadIdx.x];
+  __syncthreads();
+  project_body<2, 0, true, true>(
+      packed + (size_t)ids[group] * K * N / 16, lut, q + first * (4 * K / 8),
+      qs + first * (4 * K / 16), partial + (size_t)first * S * N, count, N, K,
+      S, blockIdx.x * 4, blockIdx.y, pair);
+}
+
+__global__ void grouped_reduce(const float* partial, const half* sv,
+                               const int* ids, const int* offsets,
+                               const int* group_for_row, float* output, int N,
+                               int S) {
+  int row = blockIdx.y, group = group_for_row[row];
+  int first = offsets[group], count = offsets[group + 1] - first;
+  int n = blockIdx.x * 128 + threadIdx.x;
+  float value = 0;
+  for (int s = 0; s < S; ++s)
+    value += partial[(size_t)first * S * N + (s * count + row - first) * N + n];
+  value = output_hadamard(value);
+  output[row * N + n] =
+      value * 0.08838834764831845f * __half2float(sv[ids[group] * N + n]);
+}
+
+extern "C" int exl3_grouped_pack(const void* input, const void* su,
+                                 const void* ids, const void* group_for_row,
+                                 void* q, void* qs, int R, int K,
+                                 void* stream) {
+  if (R < 1 || K < 128 || K % 128) return cudaErrorInvalidValue;
+  grouped_pack<<<dim3(K / 128, R), 128, 0, (cudaStream_t)stream>>>(
+      (const half*)input, (const half*)su, (const int*)ids,
+      (const int*)group_for_row, (unsigned*)q, (unsigned char*)qs, K);
+  return cudaGetLastError();
+}
+extern "C" int exl3_grouped_project(const void* packed, const void* lut,
+                                    const void* q, const void* qs,
+                                    const void* ids, const void* offsets,
+                                    const void* groups, void* partial, int R,
+                                    int N, int K, int S, void* stream) {
+  if (R < 1 || N < 128 || N % 128 || K < 128 || K % 128 || S < 1 || S > K / 64)
+    return cudaErrorInvalidValue;
+  grouped_project<<<dim3((N + 63) / 64, S, R), 128, 0, (cudaStream_t)stream>>>(
+      (const unsigned*)packed, (const unsigned char*)lut, (const unsigned*)q,
+      (const unsigned char*)qs, (const int*)ids, (const int*)offsets,
+      (const int*)groups, (float*)partial, N, K, S);
+  return cudaGetLastError();
+}
+extern "C" int exl3_grouped_reduce(const void* partial, const void* sv,
+                                   const void* ids, const void* offsets,
+                                   const void* group_for_row, void* output,
+                                   int R, int N, int S, void* stream) {
+  if (R < 1 || N < 128 || N % 128 || S < 1) return cudaErrorInvalidValue;
+  grouped_reduce<<<dim3(N / 128, R), 128, 0, (cudaStream_t)stream>>>(
+      (const float*)partial, (const half*)sv, (const int*)ids,
+      (const int*)offsets, (const int*)group_for_row, (float*)output, N, S);
+  return cudaGetLastError();
+}
+
+__global__ void route_metadata(const long long* selected, int* ids,
+                               int* offsets, int* groups, int* gather,
+                               int* inverse, int R, int topk, int experts) {
+  int lane = threadIdx.x;
+  int e = lane < R ? int(selected[lane]) : -1;
+  int leader = lane, count = 0;
+  for (int j = 0; j < R; ++j) {
+    int other = __shfl_sync(0xffffffff, e, j);
+    if (other == e) {
+      leader = min(leader, j);
+      ++count;
+    }
+  }
+  unsigned leaders = __ballot_sync(0xffffffff, lane < R && leader == lane);
+  int active = __popc(leaders);
+  int before = 0, rank = 0;
+  for (int j = 0; j < R; ++j) {
+    int other_leader = __shfl_sync(0xffffffff, leader, j);
+    if (other_leader < leader) ++before;
+    if (j < lane && other_leader == leader) ++rank;
+  }
+  if (lane < R) {
+    if (lane >= active) {
+      ids[lane] = 0;
+      ids[R + lane] = experts;
+      offsets[lane] = R;
+      offsets[R + lane] = 2 * R;
+    }
+  }
+  __syncwarp();
+  if (lane < R) {
+    int group = __popc(leaders & ((1u << leader) - 1));
+    int row = before + rank;
+    groups[row] = group;
+    groups[R + row] = R + group;
+    gather[row] = lane / topk;
+    gather[R + row] = lane / topk;
+    inverse[lane] = row;
+    if (leader == lane) {
+      ids[group] = e;
+      ids[R + group] = experts + e;
+      offsets[group] = before;
+      offsets[R + group] = R + before;
+    }
+  }
+  if (lane == 0) {
+    offsets[R] = R;
+    offsets[2 * R] = 2 * R;
+  }
+}
+
+__global__ void grouped_swiglu(const float* gu, half* activation, int R,
+                               int I) {
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < R * I) {
+    float g = gu[index], u = gu[R * I + index];
+    activation[index] = __float2half_rn((g / (1.f + expf(-g))) * u);
+  }
+}
+
+__global__ void grouped_sum(const float* values, const half* weights,
+                            const int* inverse, float* output, int M, int topk,
+                            int H) {
+  int index = blockIdx.x * blockDim.x + threadIdx.x;
+  if (index < M * H) {
+    int token = index / H, h = index % H;
+    float sum = 0;
+    for (int k = 0; k < topk; ++k) {
+      int slot = token * topk + k;
+      sum = __fadd_rn(sum, __fmul_rn(values[inverse[slot] * H + h],
+                                     __half2float(weights[slot])));
+    }
+    output[index] = sum;
+  }
+}
+
+extern "C" int exl3_route_metadata(const void* selected, void* ids,
+                                   void* offsets, void* groups, void* gather,
+                                   void* inverse, int M, int topk, int experts,
+                                   void* stream) {
+  if (M < 1 || topk < 1 || M * topk > 32 || experts < 1)
+    return cudaErrorInvalidValue;
+  route_metadata<<<1, 32, 0, (cudaStream_t)stream>>>(
+      (const long long*)selected, (int*)ids, (int*)offsets, (int*)groups,
+      (int*)gather, (int*)inverse, M * topk, topk, experts);
+  return cudaGetLastError();
+}
+extern "C" int exl3_routed_pack(const void* input, const void* su,
+                                const void* ids, const void* groups,
+                                const void* gather, void* q, void* qs, int R,
+                                int K, void* stream) {
+  if (R < 1 || K < 128 || K % 128) return cudaErrorInvalidValue;
+  grouped_pack<<<dim3(K / 128, R), 128, 0, (cudaStream_t)stream>>>(
+      (const half*)input, (const half*)su, (const int*)ids, (const int*)groups,
+      (unsigned*)q, (unsigned char*)qs, K, (const int*)gather);
+  return cudaGetLastError();
+}
+extern "C" int exl3_grouped_swiglu(const void* gu, void* activation, int R,
+                                   int I, void* stream) {
+  if (R < 1 || I < 1) return cudaErrorInvalidValue;
+  grouped_swiglu<<<(R * I + 255) / 256, 256, 0, (cudaStream_t)stream>>>(
+      (const float*)gu, (half*)activation, R, I);
+  return cudaGetLastError();
+}
+extern "C" int exl3_grouped_sum(const void* values, const void* weights,
+                                const void* inverse, void* output, int M,
+                                int topk, int H, void* stream) {
+  if (M < 1 || topk < 1 || H < 1) return cudaErrorInvalidValue;
+  grouped_sum<<<(M * H + 255) / 256, 256, 0, (cudaStream_t)stream>>>(
+      (const float*)values, (const half*)weights, (const int*)inverse,
+      (float*)output, M, topk, H);
+  return cudaGetLastError();
+}

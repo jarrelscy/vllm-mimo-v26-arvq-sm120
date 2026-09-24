@@ -1,0 +1,166 @@
+{
+  "tp_shard": 1,
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+  "scope": "Rate-2 synthetic cold experts, FP16 inputs, warm graphs, pre-grouped routing; gather/MLP/scatter included; router, attention, TP communication, drafting and verification logic excluded",
+  "tuning": [
+    {
+      "projection": "gate_up",
+      "k": 6144,
+      "n": 4096,
+      "m": 1,
+      "splits": 24,
+      "native_us": 16.38335943222046,
+      "official_us": 10.280640125274658,
+      "official_reconstruct": false
+    },
+    {
+      "projection": "gate_up",
+      "k": 6144,
+      "n": 4096,
+      "m": 2,
+      "splits": 32,
+      "native_us": 16.384960412979126,
+      "official_us": 17.021759748458862,
+      "official_reconstruct": false
+    },
+    {
+      "projection": "gate_up",
+      "k": 6144,
+      "n": 4096,
+      "m": 4,
+      "splits": 16,
+      "native_us": 24.58944082260132,
+      "official_us": 16.401920318603516,
+      "official_reconstruct": false
+    },
+    {
+      "projection": "down",
+      "k": 2048,
+      "n": 6144,
+      "m": 1,
+      "splits": 16,
+      "native_us": 12.288960218429565,
+      "official_us": 8.192639946937561,
+      "official_reconstruct": false
+    },
+    {
+      "projection": "down",
+      "k": 2048,
+      "n": 6144,
+      "m": 2,
+      "splits": 16,
+      "native_us": 12.28991985321045,
+      "official_us": 12.288960218429565,
+      "official_reconstruct": false
+    },
+    {
+      "projection": "down",
+      "k": 2048,
+      "n": 6144,
+      "m": 4,
+      "splits": 16,
+      "native_us": 16.396160125732422,
+      "official_us": 14.339200258255005,
+      "official_reconstruct": false
+    }
+  ],
+  "cases": [
+    {
+      "scenario": "draft_1",
+      "tokens": 1,
+      "active_experts": 8,
+      "expert_token_histogram": {
+        "1": 8
+      },
+      "parity": "bit exact against generic FP4",
+      "samples": [
+        {
+          "native": 252.4777603149414,
+          "official": 190.59648513793945
+        },
+        {
+          "official": 190.54847717285156,
+          "native": 251.62431716918945
+        }
+      ]
+    },
+    {
+      "scenario": "verify_shared",
+      "tokens": 4,
+      "active_experts": 8,
+      "expert_token_histogram": {
+        "4": 8
+      },
+      "parity": "bit exact against generic FP4",
+      "samples": [
+        {
+          "native": 381.94942474365234,
+          "official": 300.4003143310547
+        },
+        {
+          "official": 300.817928314209,
+          "native": 381.99039459228516
+        }
+      ]
+    },
+    {
+      "scenario": "verify_pairs",
+      "tokens": 4,
+      "active_experts": 16,
+      "expert_token_histogram": {
+        "2": 16
+      },
+      "parity": "bit exact against generic FP4",
+      "samples": [
+        {
+          "native": 566.2838363647461,
+          "official": 599.2156982421875
+        },
+        {
+          "official": 599.7615814208984,
+          "native": 565.8748626708984
+        }
+      ]
+    },
+    {
+      "scenario": "verify_mixed",
+      "tokens": 4,
+      "active_experts": 16,
+      "expert_token_histogram": {
+        "4": 4,
+        "2": 4,
+        "1": 8
+      },
+      "parity": "bit exact against generic FP4",
+      "samples": [
+        {
+          "native": 617.1903991699219,
+          "official": 500.03326416015625
+        },
+        {
+          "official": 499.73472595214844,
+          "native": 616.4524841308594
+        }
+      ]
+    },
+    {
+      "scenario": "verify_disjoint",
+      "tokens": 4,
+      "active_experts": 32,
+      "expert_token_histogram": {
+        "1": 32
+      },
+      "parity": "bit exact against generic FP4",
+      "samples": [
+        {
+          "native": 1099.9305725097656,
+          "official": 864.012451171875
+        },
+        {
+          "official": 865.1811218261719,
+          "native": 1099.2790222167969
+        }
+      ]
+    }
+  ]
+}

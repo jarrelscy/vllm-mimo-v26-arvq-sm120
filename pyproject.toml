@@ -157,6 +157,8 @@ inverse_std_variences = "inverse_std_variences"
 [tool.typos.default.extend-words]
 # Official EXL3 input-scale tensor name.
 suh = "suh"
+# Official EXL3 intermediate workspace argument names.
+interm = "interm"
 iy = "iy"
 indx = "indx"
 # intel cpu features

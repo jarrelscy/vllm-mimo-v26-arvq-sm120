@@ -1,8 +1,8 @@
 # Native SM120 FP4 experiment
 
 Measured on RTX PRO 6000 Blackwell Max-Q, 24 September 2026. This is a
-synthetic single-projection experiment, not a fitted-model quality test,
-full MoE benchmark, or vLLM integration. The serving model remained resident
+synthetic projection and routed-MLP experiment, not a fitted-model quality
+test or vLLM integration. The latest grouped comparison is at the end. The serving model remained resident
 but idle; tests used a separate process on GPU 1. Warm CUDA graph timings
 include input transform/scales, activation packing, decode/MMA, reduction,
 and output transform/scales unless explicitly marked as individual operations.
@@ -272,4 +272,155 @@ nvcc -O3 -std=c++17 --shared -Xcompiler=-fPIC \
   -gencode arch=compute_120a,code=sm_120a \
   local-results/baseline_a187.cu -o local-results/baseline_a187.so
 .venv/bin/python sm120_pack_regression.py
+```
+
+## MTP-shaped routed MLP check
+
+`sm120_mtp_moe_bench.py` models a one-token draft step and four-token target
+verification (three speculative tokens). MiMo's local config specifies hidden
+width 6144, intermediate width 2048, 384 routed experts, and eight experts per
+token. TP4 uses gate/up 6144→1024 and down 512→6144; TP1 uses 6144→4096 and
+2048→6144. Each synthetic expert uses its own random rate-2 packed weights.
+
+Both implementations execute the same pre-grouped gather, concatenated gate/up,
+FP16 SwiGLU boundary, down projection, routing weights, and output accumulation.
+Native split-K and official direct/reconstruction choices are tuned per shape
+and expert token count. Timings alternate implementation order. The grouping is
+precomputed; router execution, grouped-serving dispatch, attention, inter-GPU
+communication, and speculative sampling are not benchmarked. The official
+comparison composes `LinearEXL3` experts, not a full EXL3 engine's grouped MoE.
+
+TP4 local-shard complete routed MLP time (microseconds, average of two orders):
+
+| Workload | Expert token histogram | Native FP4 | Official composition | Official/native |
+| --- | --- | ---: | ---: | ---: |
+| One-token draft proxy | 8 × 1 | 182.2 | 163.9 | 0.90x |
+| Four-token verification, shared | 8 × 4 | 233.3 | 252.5 | 1.08x |
+| Four-token verification, pairs | 16 × 2 | 381.0 | 430.7 | 1.13x |
+| Four-token verification, mixed | 4 × 4 + 4 × 2 + 8 × 1 | 391.6 | 396.7 | 1.01x |
+| Four-token verification, disjoint | 32 × 1 | 720.0 | 646.5 | 0.90x |
+
+TP1 mostly loses: official/native ratios are 0.76x (draft), 0.79x (shared),
+1.06x (pairs), 0.81x (mixed), and 0.79x (disjoint). Therefore the earlier
+two-token projection wins do not establish a universal MTP speedup. TP4 target
+verification benefits under these shared/pair routes, while singleton expert
+work still needs improvement. Real routing traces are needed to weight these
+cases; the table must not be extrapolated to whole-model tokens/sec.
+
+All ten routed cases match the generic FP4 implementation bit-for-bit, including
+SwiGLU and weighted accumulation, and produce finite outputs. This is not
+losslessness against original EXL3 precision. The EXL3-FP4 prototype is not
+integrated into the model server: end-to-end MTP acceptance, rejection sampling,
+output distribution, and throughput are untested.
+
+```bash
+.venv/bin/python sm120_mtp_moe_bench.py --tp 4
+.venv/bin/python sm120_mtp_moe_bench.py --tp 1
+.venv/bin/python sm120_mtp_moe_bench.py --tp 4 --parity-only
+```
+
+A retry of the 64 KiB direct-state lookup with the optimized warp loader and
+preferred L1 carveout remained slower than the 1 KiB hashed lookup across the
+MTP-relevant projection shapes. It was discarded; no larger table is required
+by the retained kernel.
+
+## Grouped native FP4: batches 1–4 all improve at TP4 widths
+
+The grouped implementation supersedes the serial expert composition above.
+`GroupedMoE` runs GPU route grouping, input gather/scale/Hadamard/packing,
+grouped gate/up, output Hadamard/scales, FP16 SwiGLU, grouped down, and weighted
+summation in nine launches. Weights retain their compressed rate-2 EXL3 layout;
+there is no decoded-weight cache. The native MMA and four activation planes are
+unchanged. Gate/up tensors are concatenated once during workspace construction.
+
+The improvement comes from launching expert work together, sharing decoded
+weights between token pairs, and removing empty expert/pair blocks. Grouping
+uses a single warp for up to 32 token/expert assignments. Projection blocks
+index grouped rows, skip odd rows, and compute a pair with the same expert.
+This also handles odd token counts and arbitrary original expert IDs. Caller
+routes must contain distinct, in-range expert IDs within each token. Workspaces
+and returned outputs are reused and must not be shared by concurrent calls.
+
+The baseline now invokes official EXL3 1.5.1's actual `BC_BlockSparseMLP.run_bszN`
+two-launch grouped implementation, **not** the serial `LinearEXL3` composition.
+Its adapter was checked against official reconstructed-weight expert outputs:
+relative L2 was 0.00068–0.00096 for batches 1–4, with deterministic repeated
+outputs. Official direct execution has its own activation approximation, so
+that comparison is not expected to be bit-exact.
+
+Fixed-policy confirmation uses three fresh seeds, independently signed input
+and output scales per expert/projection, permuted expert IDs, batches 1–4,
+and shared/pair/disjoint/mixed routing: 48 cases in total. Launch policies are
+fixed by batch, not selected per routing pattern: gate/up and down split counts
+are `(8,4)`, `(4,1)`, `(8,1)`, `(8,1)`. These are also `GroupedMoE`'s defaults.
+Timing alternates native/official order and includes GPU metadata construction.
+Both implementations reuse allocated workspaces and use warm CUDA graphs.
+
+TP4 shard dimensions: hidden 6144, expert intermediate 512, top-k 8. Each
+synthetic layer holds 32 physical experts. Speedup is official time / native time:
+
+| Tokens | Slowest speedup across all seeds/routes | Largest speedup |
+| ---: | ---: | ---: |
+| 1 | 1.43x | 1.77x |
+| 2 | 1.086x | 1.21x |
+| 3 | 1.086x | 1.45x |
+| 4 | 1.064x | 1.46x |
+
+Representative median times across seeds, microseconds:
+
+| Tokens | Routing | Native FP4 | Official grouped |
+| ---: | --- | ---: | ---: |
+| 1 | Shared | 45.08 | 75.23 |
+| 2 | Shared | 71.66 | 82.81 |
+| 2 | Disjoint | 73.81 | 84.35 |
+| 3 | Shared | 75.13 | 89.93 |
+| 3 | Disjoint | 96.04 | 137.33 |
+| 4 | Shared | 80.42 | 106.83 |
+| 4 | Disjoint | 123.98 | 173.51 |
+| 4 | Mixed | 106.39 | 116.75 |
+
+Batch-one official times in the other route-labelled repeats were approximately
+65.5 microseconds (all batch-one patterns necessarily select eight singleton
+experts); the conservative 1.43x minimum includes these faster baseline runs.
+Raw per-seed results are in `results/sm120-20260924/grouped_confirm_tp4.json`.
+`grouped_moe_tp4.json` is the earlier launch-policy sweep, before removal of
+redundant blocks, and should not be mixed with the fixed-policy confirmation.
+
+Correctness checks compare GPU metadata to a CPU grouping oracle, change routes
+between replays of the same captured graph, require bit-exact eager/graph
+agreement, and compare the whole MLP against serial native FP4 projections with
+identical split counts and PyTorch SwiGLU. Across 48 cases, maximum relative L2
+was 6.46e-5 and maximum absolute difference 0.00312. These small differences can
+cross the SwiGLU FP16 boundary; grouped execution is not claimed bit-exact to
+serial execution. The test bound is relative L2 < 2e-4.
+
+Compute Sanitizer memcheck passed the full-size batch-four cases with zero
+errors. A single full-size run covering all batches exhausted the available
+memory during batch four; it did not complete successfully, so batch four was
+rerun separately. Small-shape racecheck covering all batches/routes, eager and
+captured graphs reported zero hazards. TP1 grouped timing could not complete
+because the serving model leaves insufficient memory; TP1 wins are unproven.
+
+These are single-GPU **TP4-shaped routed-MLP** measurements, not actual four-GPU
+execution. They establish neither an isolated-projection win for every batch
+nor a whole-model speedup. Attention, router logits/top-k selection, TP
+communication, real expert populations, and speculative sampling are excluded.
+MTP-relevant one-token draft and four-token verification sizes are covered, but
+end-to-end acceptance and output distribution remain untested. FP4 codebook
+approximation remains lossy relative to original EXL3 and needs model-quality
+validation before deployment.
+
+Reproduction inside the existing benchmark container, `/experiment`:
+
+```bash
+NVCC=/usr/local/cuda/bin/nvcc bash build_native_fp4.sh
+/opt/vllm/.venv/bin/python sm120_official_grouped_check.py
+/opt/vllm/.venv/bin/python sm120_grouped_confirm.py --tp 4
+# Set both allocator variables to expandable_segments:False for sanitizer runs.
+compute-sanitizer --tool memcheck --error-exitcode 99 \
+  /opt/vllm/.venv/bin/python sm120_grouped_confirm.py \
+  --seeds 1 --parity-only --batch 4
+compute-sanitizer --tool racecheck --error-exitcode 99 \
+  /opt/vllm/.venv/bin/python sm120_grouped_confirm.py \
+  --small --seeds 1 --parity-only
 ```

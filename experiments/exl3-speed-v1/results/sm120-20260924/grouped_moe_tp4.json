@@ -1,0 +1,1302 @@
+{
+  "tp": 4,
+  "gpu": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+  "rows": [
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.46112060546875,
+      "native_us": 90.16639709472656
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.46112060546875,
+      "native_us": 90.08992195129395
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.46112060546875,
+      "native_us": 89.96064186096191
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.46112060546875,
+      "native_us": 63.515520095825195
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.46112060546875,
+      "native_us": 62.458558082580566
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.46112060546875,
+      "native_us": 62.22976207733154
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 2.051119736279361e-06,
+      "official_us": 65.46112060546875,
+      "native_us": 49.14624214172363
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 2.0510783542704303e-06,
+      "official_us": 65.46112060546875,
+      "native_us": 47.20799922943115
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 2.0513032268354436e-06,
+      "official_us": 65.46112060546875,
+      "native_us": 47.13632106781006
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.46112060546875,
+      "native_us": 47.100157737731934
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.46112060546875,
+      "native_us": 45.080318450927734
+    },
+    {
+      "m": 1,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.46112060546875,
+      "native_us": 45.06783962249756
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.55071830749512,
+      "native_us": 90.76704025268555
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.55071830749512,
+      "native_us": 90.11008262634277
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.55071830749512,
+      "native_us": 90.09056091308594
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.55071830749512,
+      "native_us": 63.696961402893066
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.55071830749512,
+      "native_us": 62.8166389465332
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.55071830749512,
+      "native_us": 62.37760066986084
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 2.051119736279361e-06,
+      "official_us": 65.55071830749512,
+      "native_us": 49.1648006439209
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 2.0510783542704303e-06,
+      "official_us": 65.55071830749512,
+      "native_us": 47.219839096069336
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 2.0513032268354436e-06,
+      "official_us": 65.55071830749512,
+      "native_us": 47.11904048919678
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.55071830749512,
+      "native_us": 47.10464000701904
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.55071830749512,
+      "native_us": 45.089921951293945
+    },
+    {
+      "m": 1,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.55071830749512,
+      "native_us": 45.077757835388184
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.53215980529785,
+      "native_us": 91.52480125427246
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.53215980529785,
+      "native_us": 90.13631820678711
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.53215980529785,
+      "native_us": 90.10496139526367
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.53215980529785,
+      "native_us": 63.635520935058594
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.53215980529785,
+      "native_us": 62.80799865722656
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.53215980529785,
+      "native_us": 62.088961601257324
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 2.051119736279361e-06,
+      "official_us": 65.53215980529785,
+      "native_us": 49.1644811630249
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 2.0510783542704303e-06,
+      "official_us": 65.53215980529785,
+      "native_us": 47.37823963165283
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 2.0513032268354436e-06,
+      "official_us": 65.53215980529785,
+      "native_us": 47.13856220245361
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 9.35506339061476e-09,
+      "official_us": 65.53215980529785,
+      "native_us": 47.103681564331055
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 1.389700088338941e-08,
+      "official_us": 65.53215980529785,
+      "native_us": 45.08800029754639
+    },
+    {
+      "m": 1,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.1795131033286452e-08,
+      "official_us": 65.53215980529785,
+      "native_us": 45.0819206237793
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 6.7906569256592775e-09,
+      "official_us": 77.97120094299316,
+      "native_us": 96.30623817443848
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 9.782788801260267e-09,
+      "official_us": 77.97120094299316,
+      "native_us": 96.25215530395508
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 1.2474536958961835e-08,
+      "official_us": 77.97120094299316,
+      "native_us": 95.10144233703613
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 3.0222712666727602e-05,
+      "official_us": 77.97120094299316,
+      "native_us": 65.51136016845703
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 3.0222714485717006e-05,
+      "official_us": 77.97120094299316,
+      "native_us": 63.55231761932373
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 3.022269083885476e-05,
+      "official_us": 77.97120094299316,
+      "native_us": 63.53951930999756
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 6.7906569256592775e-09,
+      "official_us": 77.97120094299316,
+      "native_us": 55.29248237609863
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 9.782788801260267e-09,
+      "official_us": 77.97120094299316,
+      "native_us": 53.93792152404785
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 1.2474536958961835e-08,
+      "official_us": 77.97120094299316,
+      "native_us": 53.330559730529785
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 7.95700543676503e-06,
+      "official_us": 77.97120094299316,
+      "native_us": 49.15071964263916
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 7.95713367551798e-06,
+      "official_us": 77.97120094299316,
+      "native_us": 47.29343891143799
+    },
+    {
+      "m": 2,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 7.957111847645137e-06,
+      "official_us": 77.97120094299316,
+      "native_us": 47.15199947357178
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 6.7906569256592775e-09,
+      "official_us": 77.86399841308594,
+      "native_us": 96.37184143066406
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 9.782788801260267e-09,
+      "official_us": 77.86399841308594,
+      "native_us": 94.53696250915527
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 1.2474536958961835e-08,
+      "official_us": 77.86399841308594,
+      "native_us": 95.95840454101562
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 3.0222712666727602e-05,
+      "official_us": 77.86399841308594,
+      "native_us": 65.30176162719727
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 3.0222714485717006e-05,
+      "official_us": 77.86399841308594,
+      "native_us": 63.5587215423584
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 3.022269083885476e-05,
+      "official_us": 77.86399841308594,
+      "native_us": 63.5148811340332
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 6.7906569256592775e-09,
+      "official_us": 77.86399841308594,
+      "native_us": 55.291199684143066
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 9.782788801260267e-09,
+      "official_us": 77.86399841308594,
+      "native_us": 53.56575965881348
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 1.2474536958961835e-08,
+      "official_us": 77.86399841308594,
+      "native_us": 53.3519983291626
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 7.95700543676503e-06,
+      "official_us": 77.86399841308594,
+      "native_us": 49.154558181762695
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 7.95713367551798e-06,
+      "official_us": 77.86399841308594,
+      "native_us": 47.28928089141846
+    },
+    {
+      "m": 2,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 7.957111847645137e-06,
+      "official_us": 77.86399841308594,
+      "native_us": 47.15616226196289
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 9.165616710049562e-09,
+      "official_us": 86.04351997375488,
+      "native_us": 106.61567687988281
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 1.3355522021640809e-08,
+      "official_us": 86.04351997375488,
+      "native_us": 105.19328117370605
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 1.876717270477002e-08,
+      "official_us": 86.04351997375488,
+      "native_us": 107.14912414550781
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 3.229138383176178e-05,
+      "official_us": 86.04351997375488,
+      "native_us": 78.87104034423828
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 3.2291500247083604e-05,
+      "official_us": 86.04351997375488,
+      "native_us": 77.78495788574219
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 3.229127833037637e-05,
+      "official_us": 86.04351997375488,
+      "native_us": 78.46176147460938
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 9.165616710049562e-09,
+      "official_us": 86.04351997375488,
+      "native_us": 74.25183773040771
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 1.3355522021640809e-08,
+      "official_us": 86.04351997375488,
+      "native_us": 75.45055866241455
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 1.876717270477002e-08,
+      "official_us": 86.04351997375488,
+      "native_us": 77.84704208374023
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 9.165616710049562e-09,
+      "official_us": 86.04351997375488,
+      "native_us": 74.69312191009521
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 1.3355522021640809e-08,
+      "official_us": 86.04351997375488,
+      "native_us": 74.47840213775635
+    },
+    {
+      "m": 2,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 1.876717270477002e-08,
+      "official_us": 86.04351997375488,
+      "native_us": 76.24832153320312
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 4.397628799779341e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 108.64352226257324
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 4.397642896947218e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 107.64639854431152
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 4.397559678182006e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 112.98912048339844
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 4.397628799779341e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 90.97503662109375
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 4.397642896947218e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 90.15520095825195
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 4.397559678182006e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 95.51008224487305
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 7.92245555203408e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 81.75680160522461
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 7.922513759694993e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 79.97375965118408
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 7.922225449874531e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 86.00288391113281
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 8.149595487338956e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 75.9827184677124
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 8.149646419042256e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 76.95456027984619
+    },
+    {
+      "m": 3,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 8.149354471242987e-06,
+      "official_us": 88.07711601257324,
+      "native_us": 83.32736015319824
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 2.1828784610988805e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 110.65631866455078
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 2.1830185232829535e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 110.04863739013672
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 2.1830512650922174e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 111.43903732299805
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 2.2445419745054096e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 82.10623741149902
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 2.2446788534580264e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 80.9603214263916
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 2.244678626084351e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 82.61024475097656
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 1.1254265700699762e-05,
+      "official_us": 94.31039810180664,
+      "native_us": 94.9779224395752
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 1.1254347555222921e-05,
+      "official_us": 94.31039810180664,
+      "native_us": 94.83072280883789
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 1.1254224773438182e-05,
+      "official_us": 94.31039810180664,
+      "native_us": 95.51168441772461
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 2.4679081889189547e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 76.13024234771729
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 2.468041202519089e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 77.29248046875
+    },
+    {
+      "m": 3,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.468050979587133e-06,
+      "official_us": 94.31039810180664,
+      "native_us": 82.27295875549316
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 3.1775857678439934e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 130.49983978271484
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 3.1779557048139395e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 130.16480445861816
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 3.1776048672327306e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 132.73664474487305
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 1.3483683687809389e-05,
+      "official_us": 141.39264106750488,
+      "native_us": 113.66656303405762
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 1.348358182440279e-05,
+      "official_us": 141.39264106750488,
+      "native_us": 114.4320011138916
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 1.34834326672717e-05,
+      "official_us": 141.39264106750488,
+      "native_us": 118.75200271606445
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 4.736434675578494e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 112.4556827545166
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 4.736428309115581e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 113.2316780090332
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 4.736336904898053e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 116.61791801452637
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 4.736434675578494e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 109.52927589416504
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 4.736428309115581e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 110.03168106079102
+    },
+    {
+      "m": 3,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 4.736336904898053e-06,
+      "official_us": 141.39264106750488,
+      "native_us": 112.90240287780762
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 6.462600140366703e-06,
+      "official_us": 104.45856094360352,
+      "native_us": 110.07967948913574
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 6.462645615101792e-06,
+      "official_us": 104.45856094360352,
+      "native_us": 110.49983978271484
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 6.462485089286929e-06,
+      "official_us": 104.45856094360352,
+      "native_us": 118.0288028717041
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 1.8713180907070637e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 83.73279571533203
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 1.871307540568523e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 82.9468822479248
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 1.8713051758822985e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 90.98336219787598
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 1.8424121662974358e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 91.00671768188477
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 1.8424085283186287e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 92.15295791625977
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 1.8423976143822074e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 98.42047691345215
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 2.1015932361478917e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 81.51391983032227
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 2.1015890524722636e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 82.64320373535156
+    },
+    {
+      "m": 4,
+      "pattern": "shared",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.1015732272644527e-05,
+      "official_us": 104.45856094360352,
+      "native_us": 90.18207550048828
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 6.741046490787994e-06,
+      "official_us": 102.58720397949219,
+      "native_us": 123.82559776306152
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 6.74109060128103e-06,
+      "official_us": 102.58720397949219,
+      "native_us": 123.12704086303711
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 6.740930530213518e-06,
+      "official_us": 102.58720397949219,
+      "native_us": 127.55904197692871
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 1.933872226800304e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 105.2070426940918
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 1.9338636775501072e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 104.63264465332031
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 1.9338600395713e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 109.34464454650879
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 1.8553491827333346e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 100.96480369567871
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 1.855345362855587e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 101.22431755065918
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 1.855334448919166e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 105.06624221801758
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 2.1383910279837437e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 80.0819206237793
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 2.138388117600698e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 78.62527847290039
+    },
+    {
+      "m": 4,
+      "pattern": "pairs",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.1383713828981854e-05,
+      "official_us": 102.58720397949219,
+      "native_us": 85.66080093383789
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 1,
+      "relative_l2": 6.4915939219645225e-06,
+      "official_us": 167.56895065307617,
+      "native_us": 163.06528091430664
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 2,
+      "relative_l2": 6.491636213468155e-06,
+      "official_us": 167.56895065307617,
+      "native_us": 163.54400634765625
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 1,
+      "sd": 4,
+      "relative_l2": 6.491497060778784e-06,
+      "official_us": 167.56895065307617,
+      "native_us": 166.13279342651367
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 1,
+      "relative_l2": 2.617977406771388e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 152.53600120544434
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 2,
+      "relative_l2": 2.6179701308137737e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 150.6985569000244
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 2,
+      "sd": 4,
+      "relative_l2": 2.6179719498031773e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 159.4268798828125
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 1,
+      "relative_l2": 2.2324067685985938e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 139.09695625305176
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 2,
+      "relative_l2": 2.2324029487208463e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 142.5001621246338
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 4,
+      "sd": 4,
+      "relative_l2": 2.23239458136959e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 147.26911544799805
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 1,
+      "relative_l2": 2.902670530602336e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 140.09023666381836
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 2,
+      "relative_l2": 2.9026759875705466e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 140.98143577575684
+    },
+    {
+      "m": 4,
+      "pattern": "disjoint",
+      "sg": 8,
+      "sd": 4,
+      "relative_l2": 2.9026627089479007e-05,
+      "official_us": 167.56895065307617,
+      "native_us": 146.1740779876709
+    }
+  ]
+}
