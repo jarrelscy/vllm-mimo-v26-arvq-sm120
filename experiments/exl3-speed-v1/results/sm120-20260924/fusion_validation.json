@@ -1,0 +1,9 @@
+{
+  "device": "RTX PRO 6000 Blackwell Max-Q, SM120",
+  "specialized": "Bit-exact versus generic four-plane path for tested rate-2 shapes/splits",
+  "cta_fused_max_relative_l2": 2.0657115840094775e-07,
+  "memcheck": "0 errors",
+  "racecheck": "0 hazards; 0 errors; 0 warnings",
+  "repeated_workspace": "Four changed-input invocations per tested shape/split; counters return to zero",
+  "scope": "Synthetic projection only; no production integration or original EXL3 quality equivalence"
+}

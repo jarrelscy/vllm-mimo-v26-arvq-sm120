@@ -107,3 +107,108 @@ cuobjdump --dump-sass local-results/native_fp4.so
 
 Scripts write local results to the git-ignored `local-results/` directory.
 The published JSON is a snapshot, not regenerated implicitly by the tests.
+
+## Four activation planes and specialized batch-one kernel
+
+The ARVQ-style variant places four residual activation planes in MMA columns,
+using group-16 E4M3 power-of-two scales and two weight-plane MMA instructions.
+Two tokens fill all eight columns. SASS confirms native
+`OMMA.SF.16864.F32.E2M1.E2M1.UE4M3.4X`. The generic version did not improve
+batch-one speed. Against the independently reconstructed FP4-plane reference,
+maximum relative L2 was 6.48e-8 and maximum absolute error was 2.44e-4.
+
+`project(..., arvq=True, gemv=True)` selects a new rate-2, batch-one
+specialization. It extracts four related trellis states from one pair of loaded
+words and assembles both weight-plane MMA fragments from them. Other rates or
+batch sizes are rejected by this explicit entry point; the generic path remains
+available. This is not a fully fused projection: activation packing and the
+output reduction/transform remain separate launches.
+
+Paired complete-projection timings on the same SM120, microseconds:
+
+| K → N | Generic four-plane | Specialized four-plane | Official EXL3 |
+| --- | ---: | ---: | ---: |
+| 6144 → 512 | 14.12 | 10.26 | 8.21 |
+| 512 → 6144 | 12.29 | 10.25 | 6.17 |
+| 6144 → 2048 | 24.58 | 16.39 | 10.24 |
+| 2048 → 6144 | 24.58 | 16.39 | 8.19 |
+
+Rows use the fastest tested specialized split count (96, 8, 96, 16).
+The specialization matches the generic FP4 result bit-for-bit across all
+six tested shapes and valid split counts, including partial output tiles and
+uneven splits. Compute Sanitizer reports zero errors. This verifies the
+implementation against the same quantized operands, not losslessness against
+original EXL3 weights or activations. See `sm120_gemv_test.py` and the corresponding
+JSON snapshot. The kernel is experimental and is not wired into serving.
+
+Correction to the earlier description of the official baseline: profiling
+`LinearEXL3.forward` on this RTX PRO 6000 (compute capability 12.0), batch one,
+rate two, 6144→2048, captured
+`exl3_gemv_int8_sq_kernel<2,1,true,false,false>`. Thus this measured official
+baseline is an INT8 activation GEMV, not FP16 GEMM. Its codebook formula permits
+integer `dp4a` accumulation directly from hashed trellis states; it does not
+need our explicit FP4 code lookup and nibble assembly. The captured template
+selects the non-residual INT8 variant. Treat accuracy and speed as separate
+comparisons; no full-model quality equivalence was established.
+
+```bash
+.venv/bin/python sm120_native_test.py --fused --arvq
+.venv/bin/python sm120_gemv_test.py
+PYTORCH_ALLOC_CONF=expandable_segments:False \
+  compute-sanitizer --tool memcheck --error-exitcode 99 \
+  .venv/bin/python sm120_gemv_test.py --parity-only
+```
+
+## Further decoding, pipelining, and fusion experiments
+
+The current specialized decoder also uses unsigned `dp4a` to sum the hash bytes,
+a shared 1 KiB lookup, packed-byte-to-nibble compaction, and explicit prefetch of
+the next K64 compressed words before the current MMA instructions. This is a
+software prefetch pipeline; no hardware-counter proof of overlap is claimed.
+It remains native FP4 tensor-core multiplication.
+
+Best measured complete-projection times after these changes:
+
+| K → N | Specialized, three launches | Single-launch CTA fusion | Official EXL3 |
+| --- | ---: | ---: | ---: |
+| 6144 → 512 | 10.24 us | 10.25 us | ~8.2 us |
+| 512 → 6144 | 9.38 us | 8.22 us | ~6.2 us |
+| 6144 → 2048 | 13.56 us | 14.45 us | ~10.3 us |
+| 2048 → 6144 | 12.30 us | 14.34 us | ~8.2 us |
+
+**None of these variants beats the measured official baseline.** The specialized
+large projection improves substantially over the original 24.6 us four-plane
+prototype, but that is a prototype improvement, not an EXL3 speedup.
+
+Two full-fusion implementations are retained as experimental comparison paths:
+
+- `fused_project` uses a cooperative grid with packing, multiplication, and
+  reduction separated by grid barriers. It passes parity, but is slower; large
+  projections measured roughly 25–28 us at their best tested launch geometry
+  before the final decoder changes. Its JSON is labeled separately.
+- `FusedGEMV` replicates the necessary input-transform groups within each CTA,
+  writes split-K partials, then uses an atomic completion counter per 128-output
+  tile. The last CTA performs the output reduction and Hadamard. It requires no
+  grid barrier. The workspace is explicit, must be used serially, and must not
+  be shared by concurrent invocations. Its returned output buffer is reused.
+  Counters are initialized before timing and reset by each successful call.
+
+The output Hadamard uses a separate device function: the initial inlined
+cooperative implementation failed parity despite matching packed activations
+and MMA partials. That failing form is not retained. The exact cause of that
+initial discrepancy has not been established; passing tests do not establish a
+compiler bug.
+
+The specialized decoder is bit-identical to the generic FP4 path in the tested
+cases. Fusion changes the split-K summation order, so its comparison uses
+relative L2 below 1e-5 rather than bit identity. Tests cover nonuniform signed
+input/output scales, multiple sizes and split counts, and graph timing.
+These experiments do not establish original EXL3 quantization equivalence,
+whole-model quality, serving integration, or concurrent workspace safety.
+
+```bash
+.venv/bin/python sm120_gemv_test.py
+.venv/bin/python sm120_fused_test.py --cta
+.venv/bin/python sm120_fused_test.py --cta --parity-only
+.venv/bin/python sm120_fused_test.py
+```
